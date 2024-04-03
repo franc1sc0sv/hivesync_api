@@ -5,5 +5,5 @@ COPY package*.json .
 RUN npm i 
 COPY . .
 
-EXPOSE ${GATEWAY_SERVICE_PORT}
+EXPOSE ${SOCIAL_SERVICE_PORT}
 CMD npm run dev
