@@ -1,7 +1,6 @@
-FROM node:latest
-WORKDIR /home/app
-COPY package*.json ./
-RUN npm i 
-COPY . .
-EXPOSE 3000
-CMD [ "npm", "run", "dev" ]
+FROM node
+RUN mkidr -p /home/app
+COPY . /home/app
+RUN npm install
+EXPOSE ${AUTH_SERVICE_PORT}
+CMD [ "npm", "run", "start" ]
