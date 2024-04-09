@@ -6,7 +6,7 @@ services:
     ports:
       - ${GATEWAY_DB_PORT}:5432
     volumes:
-      - postgres_db:/var/lib/postgresql/data
+      - postgres_db_auth:/var/lib/postgresql/data
     environment:
       - POSTGRES_PASSWORD=${DB_USER}
       - POSTGRES_USER=${DB_PASSWORD}
@@ -18,7 +18,7 @@ services:
     ports:
       - ${SOCIAL_DB_PORT}:5432
     volumes:
-      - postgres_db:/var/lib/postgresql/data
+      - postgres_db_social:/var/lib/postgresql/data
     environment:
       - POSTGRES_PASSWORD=${DB_USER}
       - POSTGRES_USER=${DB_PASSWORD}
@@ -57,4 +57,5 @@ services:
       - /usr/src/app/node_modules
 
 volumes:
-  postgres_db:
+  postgres_db_auth:
+  postgres_db_social:

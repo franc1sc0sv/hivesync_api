@@ -1,66 +1,34 @@
 import express from "express";
 import dotenv from "dotenv";
 
-import { PrismaClient } from "@prisma/client";
-import { PrismaClientInitializationError } from "@prisma/client/runtime/library.js";
+import default_router from "./v1/default_router";
+import auth_router from "./v1/auth_router";
+
+import { createProxyMiddleware } from "http-proxy-middleware";
 
 dotenv.config();
-
 const app = express();
+
+//Config
 app.use(express.json());
+process.env.TZ = "America/El_Salvador";
 
 const PORT = process.env.PORT || 3000;
 
-const prisma = new PrismaClient();
+const BASE_URL = "/api/v1";
 
-app.get("/", async (_, res) => {
-  try {
-    await prisma.$queryRaw`SELECT 1`;
-    return res.status(200).json({
-      message: "Since HiveSync GATEWAY",
-      server: 1,
-      db: 1,
-    });
-  } catch (error) {
-    console.log(error);
-    if (error instanceof PrismaClientInitializationError) {
-      return res.status(200).json({
-        message: "Since HiveSync GATEWAY",
-        server: 1,
-        db: 0,
-      });
-    }
-    return res.status(200).json({
-      message: "Since HiveSync GATEWAY",
-      server: 0,
-      db: 0,
-    });
-  }
-});
+//routes
+app.use(BASE_URL, default_router);
+app.use(BASE_URL + "/auth", auth_router);
 
-app.get("/get_users", async (_, res) => {
-  try {
-    const data = await prisma.user.findMany();
-    return res.json(data);
-  } catch {
-    return res.json({ status: 500, message: "Error del servidor" });
-  }
-});
+const get_friends_options = {
+  target: "http://localhost:3001/get_friends",
+  changeOrigin: true,
+  logger: console,
+};
+const get_friends = createProxyMiddleware(get_friends_options);
 
-app.get("/create_user", async (_, res) => {
-  try {
-    const data = await prisma.user.create({
-      data: {
-        email: `lucy${Math.random()}ily@gmail.com`,
-        name: "Lucy <3",
-      },
-    });
-    return res.json(data);
-  } catch (e) {
-    console.log(e);
-    return res.json({ status: 500, message: "Error del servidor" });
-  }
-});
+app.use(BASE_URL + "/friends", get_friends);
 
 app.listen(PORT, () => {
   console.log(`API GATEWAY initialized in ${PORT}`);
