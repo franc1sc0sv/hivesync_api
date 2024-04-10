@@ -38,10 +38,10 @@ app.get("/", async (_, res) => {
   }
 });
 
-app.post("/get_friends", async (_, res) => {
+app.get("/get_friends", async (_, res) => {
   try {
-    // const data = await prisma.friends.findMany();
-    return res.json(_.body);
+    const data = await prisma.friends.findMany();
+    return res.json(data);
   } catch {
     return res.json({ status: 500, message: "Error del servidor" });
   }

@@ -14,6 +14,8 @@ services:
       - POSTGRES_PASSWORD=${DB_USER}
       - POSTGRES_USER=${DB_PASSWORD}
       - POSTGRES_DB=${GATEWAY_DB_NAME}
+    networks:
+      - hivesync_network
 
   db_social:
     image: postgres:14-alpine
@@ -26,6 +28,8 @@ services:
       - POSTGRES_PASSWORD=${DB_USER}
       - POSTGRES_USER=${DB_PASSWORD}
       - POSTGRES_DB=${SOCIAL_DB_NAME}
+    networks:
+      - hivesync_network
 
   social_service:
     build:
@@ -34,17 +38,14 @@ services:
     ports:
       - "3001:${SOCIAL_SERVICE_PORT}"
       - ${SOCIAL_PRISMA_PORT}:5555
-    links:
-      - db_social
     environment:
       - PORT=${SOCIAL_SERVICE_PORT}
-      - DATABASE_URL=postgres://${DB_USER}:${DB_PASSWORD}@${SOCIAL_DB_HOST}:5432/${SOCIAL_DB_NAME}'
+      - DATABASE_URL=postgres://${DB_USER}:${DB_PASSWORD}@${SOCIAL_DB_HOST}:5432/${SOCIAL_DB_NAME}
     volumes:
       - ./social_service:/usr/src/app
       - /usr/src/app/node_modules
     networks:
       - hivesync_network
-
 
   api_gateway:
     build:
@@ -53,11 +54,9 @@ services:
     ports:
       - "3000:${GATEWAY_SERVICE_PORT}"
       - ${GATEWAY_PRISMA_PORT}:5555
-    links:
-      - db_auth
     environment:
       - PORT=${GATEWAY_SERVICE_PORT}
-      - DATABASE_URL=postgres://${DB_USER}:${DB_PASSWORD}@${GATEWAY_DB_HOST}:5432/${GATEWAY_DB_NAME}'
+      - DATABASE_URL=postgres://${DB_USER}:${DB_PASSWORD}@${GATEWAY_DB_HOST}:5432/${GATEWAY_DB_NAME}
     volumes:
       - ./api_gateway:/usr/src/app
       - /usr/src/app/node_modules
