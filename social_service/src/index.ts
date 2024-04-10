@@ -7,10 +7,10 @@ import { PrismaClientInitializationError } from "@prisma/client/runtime/library.
 dotenv.config();
 
 const app = express();
+
 app.use(express.json());
 
 const PORT = process.env.PORT || 3001;
-
 const prisma = new PrismaClient();
 
 app.get("/", async (_, res) => {
@@ -38,10 +38,10 @@ app.get("/", async (_, res) => {
   }
 });
 
-app.get("/get_friends", async (_, res) => {
+app.post("/get_friends", async (_, res) => {
   try {
-    const data = await prisma.friends.findMany();
-    return res.json(data);
+    // const data = await prisma.friends.findMany();
+    return res.json(_.body);
   } catch {
     return res.json({ status: 500, message: "Error del servidor" });
   }

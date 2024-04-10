@@ -1,4 +1,7 @@
 version: "3.9"
+networks:
+  hivesync_network:
+    driver: bridge
 services:
   db_auth:
     image: postgres:14-alpine
@@ -39,6 +42,9 @@ services:
     volumes:
       - ./social_service:/usr/src/app
       - /usr/src/app/node_modules
+    networks:
+      - hivesync_network
+
 
   api_gateway:
     build:
@@ -55,6 +61,8 @@ services:
     volumes:
       - ./api_gateway:/usr/src/app
       - /usr/src/app/node_modules
+    networks:
+      - hivesync_network
 
 volumes:
   postgres_db_auth:
