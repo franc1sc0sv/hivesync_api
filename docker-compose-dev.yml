@@ -55,6 +55,7 @@ services:
       - "3000:${GATEWAY_SERVICE_PORT}"
       - ${GATEWAY_PRISMA_PORT}:5555
     environment:
+      - JWT_SECRET=${JWT_SECRET}
       - PORT=${GATEWAY_SERVICE_PORT}
       - DATABASE_URL=postgres://${DB_USER}:${DB_PASSWORD}@${GATEWAY_DB_HOST}:5432/${GATEWAY_DB_NAME}
     volumes:

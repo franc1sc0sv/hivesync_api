@@ -18,7 +18,7 @@ export const base_route = async (_: Request, res: Response) => {
     };
 
     return res
-      .status(400)
+      .status(200)
       .json(good_response({ data, message: "SINCE HIVESYNC GATEWAY" }));
   } catch (error) {
     if (error instanceof PrismaClientInitializationError) {

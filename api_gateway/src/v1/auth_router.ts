@@ -4,11 +4,12 @@ import {
   register_controller,
   get_profile_controller,
 } from "../controllers/auth/auth_controller";
+import { auth_middleware } from "../middleware/auth";
 
 const auth_router = Router();
 
 auth_router.route("/register").post(register_controller);
 auth_router.route("/login").get(login_controller);
-auth_router.route("/profile").get(get_profile_controller);
+auth_router.route("/profile").get(auth_middleware(), get_profile_controller);
 
 export default auth_router;
