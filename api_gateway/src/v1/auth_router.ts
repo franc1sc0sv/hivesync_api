@@ -9,7 +9,7 @@ import { auth_middleware } from "../middleware/auth";
 const auth_router = Router();
 
 auth_router.route("/register").post(register_controller);
-auth_router.route("/login").get(login_controller);
+auth_router.route("/login").post(login_controller);
 auth_router.route("/profile").get(auth_middleware(), get_profile_controller);
 
 export default auth_router;

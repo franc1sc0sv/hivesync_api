@@ -23,53 +23,72 @@ import RequestWithUser from "../../../interfaces/auth_interface";
 const prisma = new PrismaClient();
 
 export const login_controller = async (req: RequestWithUser, res: Response) => {
-  const raw_data: UserInputLogin = req.body;
-  const parsed_data = UserInputLoginSc.parse(raw_data);
+  try {
+    const raw_data: UserInputLogin = req.body;
+    const parsed_data = UserInputLoginSc.parse(raw_data);
 
-  const user = await prisma.user.findFirst({
-    where: {
-      email: parsed_data.email,
-    },
-  });
+    const user = await prisma.user.findFirst({
+      where: {
+        email: parsed_data.email,
+      },
+    });
 
-  if (!user)
-    return res.status(400).json(
-      error_response({
+    if (!user)
+      return res.status(400).json(
+        error_response({
+          data: {
+            message: "cuenta no existe",
+          },
+        })
+      );
+
+    const valid_password = await bcrypt.compare(
+      parsed_data.password,
+      user.password
+    );
+
+    if (!valid_password)
+      return res.status(400).json(
+        error_response({
+          data: {
+            message: "contraseña incorrecta",
+          },
+        })
+      );
+
+    const JWT_SECRET = process.env.JWT_SECRET;
+
+    const token = jwt.sign(
+      {
+        id: user.id,
+      },
+      JWT_SECRET as string
+    );
+
+    return res.status(200).json(
+      good_response({
+        data: { ...user, token },
+        message: "user l",
+      })
+    );
+  } catch (error) {
+    const zod_error = detect_zod_error({ error });
+    if (zod_error?.error)
+      return res
+        .status(400)
+        .json(
+          error_response({ data: { error: error, message: zod_error.error } })
+        );
+
+    return res.status(500).json(
+      bad_response({
         data: {
-          message: "cuenta no existe",
+          message: "error en el servidor",
+          error: error,
         },
       })
     );
-
-  const valid_password = await bcrypt.compare(
-    parsed_data.password,
-    user.password
-  );
-
-  if (!valid_password)
-    return res.status(400).json(
-      error_response({
-        data: {
-          message: "contraseña incorrecta",
-        },
-      })
-    );
-
-  const JWT_SECRET = process.env.JWT_SECRET;
-
-  const token = jwt.sign(
-    {
-      id: user.id,
-    },
-    JWT_SECRET as string
-  );
-
-  return res.status(200).json(
-    good_response({
-      data: { ...user, token },
-      message: "user l",
-    })
-  );
+  }
 };
 
 export const register_controller = async (

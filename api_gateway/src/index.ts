@@ -1,5 +1,6 @@
 import express from "express";
 import dotenv from "dotenv";
+import cors from "cors";
 
 import default_router from "./v1/default_router";
 import auth_router from "./v1/auth_router";
@@ -9,6 +10,7 @@ const app = express();
 
 //Config
 app.use(express.json());
+app.use(cors());
 process.env.TZ = "America/El_Salvador";
 
 const PORT = process.env.PORT || 3000;
