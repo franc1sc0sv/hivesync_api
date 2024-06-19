@@ -31,19 +31,17 @@ services:
     networks:
       - hivesync_network
 
-  social_service:
-    build:
-      context: ./social_service
-      dockerfile: Dockerfile.dev
+  db_user:
+    image: postgres:14-alpine
+    restart: always
     ports:
-      - "3001:${SOCIAL_SERVICE_PORT}"
-      - ${SOCIAL_PRISMA_PORT}:5555
-    environment:
-      - PORT=${SOCIAL_SERVICE_PORT}
-      - DATABASE_URL=postgres://${DB_USER}:${DB_PASSWORD}@${SOCIAL_DB_HOST}:5432/${SOCIAL_DB_NAME}
+      - ${USER_DB_PORT}:5432
     volumes:
-      - ./social_service:/usr/src/app
-      - /usr/src/app/node_modules
+      - postgres_db_user:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_PASSWORD=${DB_USER}
+      - POSTGRES_USER=${DB_PASSWORD}
+      - POSTGRES_DB=${USER_DB_NAME}
     networks:
       - hivesync_network
 
@@ -52,11 +50,11 @@ services:
       context: ./api_gateway
       dockerfile: Dockerfile.dev
     ports:
-      - "3000:${GATEWAY_SERVICE_PORT}"
+      - "${GATEWAY_SERVICE_PORT}:3000"
       - ${GATEWAY_PRISMA_PORT}:5555
     environment:
       - JWT_SECRET=${JWT_SECRET}
-      - PORT=${GATEWAY_SERVICE_PORT}
+      - PORT=${DEFAULT_INTERNAL_PORT_API}
       - DATABASE_URL=postgres://${DB_USER}:${DB_PASSWORD}@${GATEWAY_DB_HOST}:5432/${GATEWAY_DB_NAME}
     volumes:
       - ./api_gateway:/usr/src/app
@@ -64,6 +62,40 @@ services:
     networks:
       - hivesync_network
 
+  social_service:
+    build:
+      context: ./social_service
+      dockerfile: Dockerfile.dev
+    ports:
+      - "${SOCIAL_SERVICE_PORT}:3000"
+      - ${SOCIAL_PRISMA_PORT}:5555
+    environment:
+      - PORT=${DEFAULT_INTERNAL_PORT_API}
+      - DATABASE_URL=postgres://${DB_USER}:${DB_PASSWORD}@${SOCIAL_DB_HOST}:5432/${SOCIAL_DB_NAME}
+    volumes:
+      - ./social_service:/usr/src/app
+      - /usr/src/app/node_modules
+    networks:
+      - hivesync_network
+    
+  user_info_service:
+    build:
+      context: ./user_info_service
+      dockerfile: Dockerfile.dev
+    ports:
+      - "${USER_SERVICE_PORT}:3000"
+      - ${USER_PRISMA_PORT}:5555
+    environment:
+      - JWT_SECRET=${JWT_SECRET}
+      - PORT=${DEFAULT_INTERNAL_PORT_API}
+      - DATABASE_URL=postgres://${DB_USER}:${DB_PASSWORD}@${USER_DB_HOST}:5432/${USER_DB_NAME}
+    volumes:
+      - ./user_info_service:/usr/src/app
+      - /usr/src/app/node_modules
+    networks:
+      - hivesync_network
+
 volumes:
   postgres_db_auth:
   postgres_db_social:
+  postgres_db_user:

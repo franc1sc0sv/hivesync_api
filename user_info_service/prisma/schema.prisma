@@ -14,10 +14,12 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id       String @id @default(uuid())
-  email    String @unique
-  username String @unique
-  password String
-  token    String @default(uuid())
+model UserInfo {
+  id            String   @id @default(uuid())
+  name          String
+  about         String
+  profileUrl    String
+  backgroundUrl String
+  id_user       String
+  createdAt     DateTime @default(now())
 }

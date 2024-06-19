@@ -2,10 +2,10 @@ import jwt from "jsonwebtoken";
 import { NextFunction, Response } from "express";
 
 import { PrismaClient } from "@prisma/client";
-import { bad_response, custom_response } from "../utlis/api_response_utils";
+import { bad_response, custom_response, API_STATUS } from "hivesync_utils";
 import { StatusCodes } from "http-status-codes";
-import { API_STATUS } from "../enums/response_status";
-import RequestWithUser from "../../interfaces/auth_interface";
+
+import RequestWithUser from "../interfaces/auth_interface";
 
 const prisma = new PrismaClient();
 

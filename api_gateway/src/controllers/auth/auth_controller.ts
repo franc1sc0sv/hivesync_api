@@ -6,19 +6,23 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
 import {
-  bad_response,
-  error_response,
-  good_response,
-} from "../../utlis/api_response_utils";
-
-import {
   UserInputLoginSc,
+  UserInputRegisterInfoSc,
   UserInputRegisterSc,
 } from "../../schemas/user.schema";
+
 import { UserInputLogin, UserInputRegister } from "../../types/user";
 
-import { detect_zod_error } from "../../utlis/zod_utils";
-import RequestWithUser from "../../../interfaces/auth_interface";
+import RequestWithUser from "../../interfaces/auth_interface";
+
+import {
+  bad_response,
+  detect_zod_error,
+  error_response,
+  good_response,
+} from "hivesync_utils";
+import { postData } from "../../utlis/http_request";
+import { AxiosUserInfoService } from "../../config/axios";
 
 const prisma = new PrismaClient();
 
@@ -29,7 +33,14 @@ export const login_controller = async (req: RequestWithUser, res: Response) => {
 
     const user = await prisma.user.findFirst({
       where: {
-        email: parsed_data.email,
+        OR: [
+          {
+            email: parsed_data.user,
+          },
+          {
+            username: parsed_data.user,
+          },
+        ],
       },
     });
 
@@ -98,6 +109,7 @@ export const register_controller = async (
   try {
     const raw_data: UserInputRegister = req.body;
     const parsed_data = UserInputRegisterSc.parse(raw_data);
+    const parsed_data_user_info = UserInputRegisterInfoSc.parse(raw_data);
 
     const user = await prisma.user.findFirst({
       where: {
@@ -116,7 +128,7 @@ export const register_controller = async (
       return res.status(400).json(
         error_response({
           data: {
-            message: "email o username ya existe",
+            message: "email o usuario ya existe",
           },
         })
       );
@@ -131,13 +143,25 @@ export const register_controller = async (
 
     const new_user = await prisma.user.create({ data: user_data });
 
+    const user_info_data = {
+      name: parsed_data_user_info.name,
+      id_user: new_user.id,
+    };
+
+    await postData({
+      url: "/info",
+      data: user_info_data,
+      AxiosConfig: AxiosUserInfoService,
+    });
+
     return res.status(200).json(
       good_response({
-        data: new_user,
+        data: { ...new_user },
         message: "user created",
       })
     );
   } catch (error) {
+    console.log(error);
     const zod_error = detect_zod_error({ error });
     if (zod_error?.error)
       return res
