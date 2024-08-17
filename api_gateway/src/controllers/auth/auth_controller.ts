@@ -161,7 +161,6 @@ export const register_controller = async (
       })
     );
   } catch (error) {
-    console.log(error);
     const zod_error = detect_zod_error({ error });
     if (zod_error?.error)
       return res
