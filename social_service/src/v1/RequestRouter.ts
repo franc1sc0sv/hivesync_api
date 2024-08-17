@@ -1,5 +1,6 @@
 import { Router } from "express";
 import {
+  AcceptRequestController,
   CreateRequestController,
   RejectRequestController,
 } from "../controllers/RequestController";
@@ -10,5 +11,10 @@ const FriendRequestRouter = Router();
 FriendRequestRouter.route("/")
   .post([auth_middleware, CreateRequestController])
   .delete([auth_middleware, RejectRequestController]);
+
+FriendRequestRouter.route("/accept").post([
+  auth_middleware,
+  AcceptRequestController,
+]);
 
 export default FriendRequestRouter;

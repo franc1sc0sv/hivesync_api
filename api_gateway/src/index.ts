@@ -6,6 +6,7 @@ import default_router from "./v1/default_router";
 import auth_router from "./v1/auth_router";
 import {
   FriendsProxyMiddeware,
+  ServersProxyMiddleware,
   UserInfoProxyMiddleware,
 } from "./middleware/microservices";
 import { auth_middleware_microservices } from "./middleware/authForMicroservices";
@@ -38,6 +39,11 @@ app.use(BASE_URL + "/social", [
 app.use(BASE_URL + "/user_info", [
   auth_middleware_microservices,
   UserInfoProxyMiddleware,
+]);
+
+app.use(BASE_URL + "/user_info", [
+  auth_middleware_microservices,
+  ServersProxyMiddleware,
 ]);
 
 app.listen(PORT, () => {

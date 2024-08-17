@@ -1,5 +1,5 @@
 import { NextFunction, Response } from "express";
-import RequestWithUser from "../src/interfaces/auth_interface";
+import RequestWithUser from "../interfaces/auth_interface";
 import {
   API_STATUS,
   bad_response,

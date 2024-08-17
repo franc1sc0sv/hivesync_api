@@ -8,20 +8,18 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum PrivacityServer {
-  PUBLIC
-  PRIVATE
-}
-
 model Servers {
   id        String          @id @default(uuid())
   name      String
   avatarURL String
   privacity PrivacityServer
+  id_user   String
   createdAt DateTime        @default(now())
-  tags      Tags[]          @relation("ServerTags")
-  events    Event[]         @relation("ServerEvents")
-  members   ServerMembers[] @relation("ServerMemberships")
+
+  categories Categories[]    @relation("ServerCategories")
+  events     Event[]         @relation("ServerEvents")
+  members    ServerMembers[] @relation("ServerMemberships")
+  tags       Tags[]          @relation("ServerTags")
 }
 
 model Event {
@@ -34,8 +32,10 @@ model Event {
 }
 
 model Categories {
-  id   String @id @default(uuid())
-  name String
+  id       String  @id @default(uuid())
+  name     String
+  serverId String
+  Servers  Servers @relation("ServerCategories", fields: [serverId], references: [id])
 }
 
 model Tags {
@@ -52,4 +52,9 @@ model ServerMembers {
   joinedAt  DateTime @default(now())
   serverId  String
   server    Servers  @relation("ServerMemberships", fields: [serverId], references: [id])
+}
+
+enum PrivacityServer {
+  PUBLIC
+  PRIVATE
 }

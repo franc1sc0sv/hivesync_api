@@ -2,6 +2,10 @@ import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
 import DefaultRouter from "./v1/DefaultRouter";
+import ServerRouter from "./v1/ServerRouter";
+import CategoriesRouter from "./v1/CategoriesRouter";
+import TagsRouter from "./v1/TagsRouter";
+import EventsRouter from "./v1/EventsRouter";
 
 dotenv.config();
 const app = express();
@@ -22,6 +26,10 @@ app.get(BASE_URL + "/", (_, res) => {
 });
 
 app.use(BASE_URL, DefaultRouter);
+app.use(BASE_URL + "/servers", ServerRouter);
+app.use(BASE_URL + "/categories", CategoriesRouter);
+app.use(BASE_URL + "/tags", TagsRouter);
+app.use(BASE_URL + "/events", EventsRouter);
 
 app.listen(PORT, () => {
   console.log(`SERVER microservice initialized in ${PORT}`);
