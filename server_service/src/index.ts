@@ -2,8 +2,6 @@ import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
 import DefaultRouter from "./v1/DefaultRouter";
-import FriendRequestRouter from "./v1/RequestRouter";
-import FriendsRouter from "./v1/FriendsRouter";
 
 dotenv.config();
 const app = express();
@@ -24,9 +22,7 @@ app.get(BASE_URL + "/", (_, res) => {
 });
 
 app.use(BASE_URL, DefaultRouter);
-app.use(BASE_URL + "/friends", FriendsRouter);
-app.use(BASE_URL + "/request", FriendRequestRouter);
 
 app.listen(PORT, () => {
-  console.log(`SOCIAL microservice initialized in ${PORT}`);
+  console.log(`SERVER microservice initialized in ${PORT}`);
 });

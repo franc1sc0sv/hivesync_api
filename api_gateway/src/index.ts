@@ -2,10 +2,13 @@ import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
 
-import { createProxyMiddleware } from "http-proxy-middleware";
-
 import default_router from "./v1/default_router";
 import auth_router from "./v1/auth_router";
+import {
+  FriendsProxyMiddeware,
+  UserInfoProxyMiddleware,
+} from "./middleware/microservices";
+import { auth_middleware_microservices } from "./middleware/authForMicroservices";
 
 dotenv.config();
 const app = express();
@@ -27,11 +30,15 @@ app.get("/", (_, res) => {
 app.use(BASE_URL, default_router);
 app.use(BASE_URL + "/auth", auth_router);
 
-const proxyMiddleware = createProxyMiddleware({
-  target: "http://hivesync_api-social_service-1:3000/friends",
-});
+app.use(BASE_URL + "/social", [
+  auth_middleware_microservices,
+  FriendsProxyMiddeware,
+]);
 
-app.use(BASE_URL + "/friends", proxyMiddleware);
+app.use(BASE_URL + "/user_info", [
+  auth_middleware_microservices,
+  UserInfoProxyMiddleware,
+]);
 
 app.listen(PORT, () => {
   console.log(`API GATEWAY initialized in ${PORT}`);

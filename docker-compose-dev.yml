@@ -3,6 +3,7 @@ networks:
   hivesync_network:
     driver: bridge
 services:
+  # Data Bases
   db_auth:
     image: postgres:14-alpine
     restart: always
@@ -45,6 +46,49 @@ services:
     networks:
       - hivesync_network
 
+  db_server:
+    image: postgres:14-alpine
+    restart: always
+    ports:
+      - ${SERVER_DB_PORT}:5432
+    volumes:
+      - postgres_db_sever:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_PASSWORD=${DB_USER}
+      - POSTGRES_USER=${DB_PASSWORD}
+      - POSTGRES_DB=${SERVER_DB_NAME}
+    networks:
+      - hivesync_network
+
+  db_notifications:
+    image: postgres:14-alpine
+    restart: always
+    ports:
+      - ${NOTIFICATIONS_DB_PORT}:5432
+    volumes:
+      - postgres_db_notifications:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_PASSWORD=${DB_USER}
+      - POSTGRES_USER=${DB_PASSWORD}
+      - POSTGRES_DB=${NOTIFICATIONS_DB_NAME}
+    networks:
+      - hivesync_network
+
+  db_channels:
+    image: postgres:14-alpine
+    restart: always
+    ports:
+      - ${CHANNELS_DB_PORT}:5432
+    volumes:
+      - postgres_db_channels:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_PASSWORD=${DB_USER}
+      - POSTGRES_USER=${DB_PASSWORD}
+      - POSTGRES_DB=${CHANNELS_DB_NAME}
+    networks:
+      - hivesync_network
+
+  # SERVICES
   api_gateway:
     build:
       context: ./api_gateway
@@ -95,7 +139,61 @@ services:
     networks:
       - hivesync_network
 
+  server_service:
+    build:
+      context: ./server_service
+      dockerfile: Dockerfile.dev
+    ports:
+      - "${SERVER_SERVICE_PORT}:3000"
+      - ${SERVER_PRISMA_PORT}:5555
+    environment:
+      - JWT_SECRET=${JWT_SECRET}
+      - PORT=${DEFAULT_INTERNAL_PORT_API}
+      - DATABASE_URL=postgres://${DB_USER}:${DB_PASSWORD}@${SERVER_DB_HOST}:5432/${SERVER_DB_NAME}
+    volumes:
+      - ./server_service:/usr/src/app
+      - /usr/src/app/node_modules
+    networks:
+      - hivesync_network
+
+  notifications_service:
+    build:
+      context: ./notifications_service
+      dockerfile: Dockerfile.dev
+    ports:
+      - "${NOTIFICATIONS_SERVICE_PORT}:3000"
+      - ${NOTIFICATIONS_PRISMA_PORT}:5555
+    environment:
+      - JWT_SECRET=${JWT_SECRET}
+      - PORT=${DEFAULT_INTERNAL_PORT_API}
+      - DATABASE_URL=postgres://${DB_USER}:${DB_PASSWORD}@${NOTIFICATIONS_DB_HOST}:5432/${NOTIFICATIONS_DB_NAME}
+    volumes:
+      - ./notifications_service:/usr/src/app
+      - /usr/src/app/node_modules
+    networks:
+      - hivesync_network
+    
+  channels_service:
+    build:
+      context: ./channels_service
+      dockerfile: Dockerfile.dev
+    ports:
+      - "${CHANNELS_SERVICE_PORT}:3000"
+      - ${CHANNELS_PRISMA_PORT}:5555
+    environment:
+      - JWT_SECRET=${JWT_SECRET}
+      - PORT=${DEFAULT_INTERNAL_PORT_API}
+      - DATABASE_URL=postgres://${DB_USER}:${DB_PASSWORD}@${CHANNELS_DB_HOST}:5432/${CHANNELS_DB_NAME}
+    volumes:
+      - ./channels_service:/usr/src/app
+      - /usr/src/app/node_modules
+    networks:
+      - hivesync_network
+
 volumes:
   postgres_db_auth:
   postgres_db_social:
   postgres_db_user:
+  postgres_db_sever:
+  postgres_db_notifications:
+  postgres_db_channels:
