@@ -1,3 +1,4 @@
+import { PrivacityServer } from "@prisma/client";
 import { z } from "zod";
 
 export const CreateServerSchema = z.object({

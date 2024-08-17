@@ -26,7 +26,7 @@ app.get(BASE_URL + "/", (_, res) => {
 });
 
 app.use(BASE_URL, DefaultRouter);
-app.use(BASE_URL + "/servers", ServerRouter);
+app.use(BASE_URL + "/management", ServerRouter);
 app.use(BASE_URL + "/categories", CategoriesRouter);
 app.use(BASE_URL + "/tags", TagsRouter);
 app.use(BASE_URL + "/events", EventsRouter);

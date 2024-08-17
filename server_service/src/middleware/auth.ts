@@ -7,29 +7,31 @@ import {
   StatusCodes,
 } from "hivesync_utils";
 
-export const auth_middleware = () => {
-  return async (req: RequestWithUser, res: Response, next: NextFunction) => {
-    try {
-      const user = req.user;
-      if (!user?.id) {
-        return res.status(401).json(
-          custom_response({
-            data: {
-              message: "Acceso no permitido",
-            },
-            code: StatusCodes.UNAUTHORIZED,
-            status: API_STATUS.ACCESS_DENIED,
-          })
-        );
-      }
-      return next();
-    } catch (error) {
-      return res.status(500).json(
-        bad_response({
-          data: { error: error },
-          message: "error de autentificacion",
+export const auth_middleware = (
+  req: RequestWithUser,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const user = req.user;
+    if (!user?.id) {
+      return res.status(401).json(
+        custom_response({
+          data: {
+            message: "Acceso no permitido",
+          },
+          code: StatusCodes.UNAUTHORIZED,
+          status: API_STATUS.ACCESS_DENIED,
         })
       );
     }
-  };
+    return next();
+  } catch (error) {
+    return res.status(500).json(
+      bad_response({
+        data: { error: error },
+        message: "error de autentificacion",
+      })
+    );
+  }
 };

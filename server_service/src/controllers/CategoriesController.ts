@@ -68,6 +68,7 @@ export const DeleteCategory = async (req: RequestWithUser, res: Response) => {
 
     return res.status(200).json(
       good_response({
+        data: {},
         message: "Categoría eliminada con éxito",
       })
     );

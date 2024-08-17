@@ -64,6 +64,7 @@ export const DeleteServer = async (req: RequestServer, res: Response) => {
 
     return res.status(200).json(
       good_response({
+        data: {},
         message: "Servidor eliminado con éxito",
       })
     );

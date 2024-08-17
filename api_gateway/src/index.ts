@@ -32,17 +32,17 @@ app.use(BASE_URL, default_router);
 app.use(BASE_URL + "/auth", auth_router);
 
 app.use(BASE_URL + "/social", [
-  auth_middleware_microservices,
+  auth_middleware_microservices(),
   FriendsProxyMiddeware,
 ]);
 
 app.use(BASE_URL + "/user_info", [
-  auth_middleware_microservices,
+  auth_middleware_microservices(),
   UserInfoProxyMiddleware,
 ]);
 
-app.use(BASE_URL + "/user_info", [
-  auth_middleware_microservices,
+app.use(BASE_URL + "/server", [
+  auth_middleware_microservices(),
   ServersProxyMiddleware,
 ]);
 

@@ -63,6 +63,7 @@ export const DeleteEvent = async (req: RequestServer, res: Response) => {
 
     return res.status(200).json(
       good_response({
+        data: {},
         message: "Evento eliminado con éxito",
       })
     );
