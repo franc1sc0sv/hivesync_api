@@ -32,7 +32,7 @@ export const IsServerAdmin = async (
 
     const server: Servers = await getData({
       AxiosConfig: AxiosServerService,
-      url: `/management/${id_server}`,
+      url: `/management/basic/${id_server}`,
       headers: headers_by_json({ data: req.user }),
     });
 
@@ -65,6 +65,7 @@ export const IsServerAdmin = async (
     req.server = { ...server };
     return next();
   } catch (error) {
+    console.log(error);
     return res.status(500).json(
       bad_response({
         data: { error: error },

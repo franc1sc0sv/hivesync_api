@@ -15,7 +15,7 @@ import { ZodError } from "zod";
 import RequestServer from "../interfaces/RequestWithServer";
 
 import { v4 as uuidv4 } from "uuid";
-import { headers_by_json, postData } from "../utlis/http_request";
+import { getData, headers_by_json, postData } from "../utlis/http_request";
 import { AxiosChannelsService } from "../../config/axios";
 import { ChannelsType } from "../types/channels";
 import { ChannelTypeEnum } from "../enums/ChannelType";
@@ -214,7 +214,7 @@ export const GetDataFromSpecificServer = async (
 ) => {
   try {
     const id_server = req.server?.id;
-    const server = await prisma.servers.findUnique({
+    const server = await prisma.servers.findFirst({
       where: { id: id_server },
       include: {
         tags: true,
@@ -222,6 +222,55 @@ export const GetDataFromSpecificServer = async (
         events: true,
         members: true,
       },
+    });
+
+    if (!server) {
+      return res.status(404).json(
+        error_response({
+          data: { message: "Servidor no encontrado" },
+        })
+      );
+    }
+
+    const channels = await getData({
+      AxiosConfig: AxiosChannelsService,
+      url: `/management/many/${server.id}`,
+      headers: headers_by_json({ data: req?.user }),
+    });
+
+    return res.status(200).json(
+      good_response({
+        data: { ...server, channels: [...channels] },
+        message: "Datos del servidor obtenidos con éxito",
+      })
+    );
+  } catch (error) {
+    const zod_error = detect_zod_error({ error });
+    console.log(error);
+    if (error instanceof ZodError) {
+      return res
+        .status(400)
+        .json(
+          error_response({ data: { error: error, message: zod_error?.error } })
+        );
+    }
+    return res.status(500).json(
+      error_response({
+        data: { error: error },
+        message: "Error obteniendo los datos del servidor",
+      })
+    );
+  }
+};
+
+export const GetBasicDataFromSpecificServer = async (
+  req: RequestServer,
+  res: Response
+) => {
+  try {
+    const id_server = req.server?.id;
+    const server = await prisma.servers.findFirst({
+      where: { id: id_server },
     });
 
     if (!server) {
@@ -240,7 +289,7 @@ export const GetDataFromSpecificServer = async (
     );
   } catch (error) {
     const zod_error = detect_zod_error({ error });
-
+    console.log(error);
     if (error instanceof ZodError) {
       return res
         .status(400)

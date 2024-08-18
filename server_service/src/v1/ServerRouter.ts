@@ -4,6 +4,7 @@ import {
   DeleteServer,
   EditInfoServer,
   GetAllServersByUser,
+  GetBasicDataFromSpecificServer,
   GetDataFromSpecificServer,
 } from "../controllers/ServerController";
 import { auth_middleware } from "../middleware/auth";
@@ -20,4 +21,9 @@ ServerRouter.route("/:id")
   .delete([auth_middleware, IsServerAdmin, DeleteServer])
   .patch([auth_middleware, IsServerAdmin, EditInfoServer]);
 
+ServerRouter.route("/basic/:id").get([
+  auth_middleware,
+  IsServerAdmin,
+  GetBasicDataFromSpecificServer,
+]);
 export default ServerRouter;
