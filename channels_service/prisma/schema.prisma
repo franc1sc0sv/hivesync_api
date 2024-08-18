@@ -14,16 +14,15 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Friends {
-  id        String   @id @default(uuid())
-  createdAt DateTime @default(now())
-  friend1   String
-  friend2   String
+enum ChannelType {
+  VIDEO
+  TEXT
 }
 
-model FriensRequests {
-  id                  String   @id @default(uuid())
-  createdAt           DateTime @default(now())
-  WhoSentTheRequest   String
-  WhoReciveTheRequest String
+model Channels {
+  id         String      @id @default(uuid())
+  name       String
+  CategoryID String
+  ServerID   String
+  type       ChannelType
 }

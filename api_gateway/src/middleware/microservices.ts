@@ -11,6 +11,7 @@ export const FriendsProxyMiddeware = createProxyMiddleware({
       fixRequestBody(proxyReq, req);
     },
   },
+  logger: console,
 });
 
 export const UserInfoProxyMiddleware = createProxyMiddleware({
@@ -29,6 +30,19 @@ export const ServersProxyMiddleware = createProxyMiddleware({
   target: "http://hivesync_api-server_service-1:3000/api/v1",
   changeOrigin: true,
   pathRewrite: { "^/sever": "" },
+  on: {
+    proxyReq: (proxyReq, req: RequestWithUser) => {
+      proxyReq.setHeader("user", JSON.stringify(req.user));
+      fixRequestBody(proxyReq, req);
+    },
+  },
+  logger: console,
+});
+
+export const ChannelsProxyMiddleware = createProxyMiddleware({
+  target: "http://hivesync_api-channels_service-1:3000/api/v1",
+  changeOrigin: true,
+  pathRewrite: { "^/channels": "" },
   on: {
     proxyReq: (proxyReq, req: RequestWithUser) => {
       proxyReq.setHeader("user", JSON.stringify(req.user));

@@ -2,6 +2,7 @@ import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
 import DefaultRouter from "./v1/DefaultRouter";
+import ChannelsRouter from "./v1/ChannelsRouter";
 
 dotenv.config();
 const app = express();
@@ -22,6 +23,7 @@ app.get(BASE_URL + "/", (_, res) => {
 });
 
 app.use(BASE_URL, DefaultRouter);
+app.use(BASE_URL + "/management", ChannelsRouter);
 
 app.listen(PORT, () => {
   console.log(`CHANNELS microservice initialized in ${PORT}`);

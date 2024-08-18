@@ -17,7 +17,7 @@ ServerRouter.route("/")
   .delete([auth_middleware, IsServerAdmin, DeleteServer])
   .patch([auth_middleware, IsServerAdmin, EditInfoServer]);
 
-ServerRouter.route("/specific").get([
+ServerRouter.route("/:id").get([
   auth_middleware,
   IsServerAdmin,
   GetDataFromSpecificServer,

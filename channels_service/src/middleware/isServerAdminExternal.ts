@@ -1,9 +1,9 @@
 import { NextFunction, Response } from "express";
 import { API_STATUS, custom_response, StatusCodes } from "hivesync_utils";
-import { PrismaClient } from "@prisma/client";
-import RequestServer from "../interfaces/RequestWithServer";
 
-const prisma = new PrismaClient();
+import RequestServer, { Servers } from "../interfaces/RequestWithServer";
+import { AxiosServerService } from "../config/axios";
+import { getData } from "../utlis/http_request";
 
 export const IsServerAdmin = async (
   req: RequestServer,
@@ -12,7 +12,9 @@ export const IsServerAdmin = async (
 ) => {
   try {
     const id_server = req.params.id;
-    const id_user = req.user?.id as string;
+
+    const id_user = req.user.id as string;
+    const token = req.user.token as string;
 
     if (!id_server)
       return res.status(401).json(
@@ -25,8 +27,10 @@ export const IsServerAdmin = async (
         })
       );
 
-    const server = await prisma.servers.findUnique({
-      where: { id: id_server },
+    const server: Servers = await getData({
+      AxiosConfig: AxiosServerService,
+      url: `/management/${id_server}`,
+      token: token,
     });
 
     if (!server) {

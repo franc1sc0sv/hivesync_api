@@ -5,6 +5,7 @@ import cors from "cors";
 import default_router from "./v1/default_router";
 import auth_router from "./v1/auth_router";
 import {
+  ChannelsProxyMiddleware,
   FriendsProxyMiddeware,
   ServersProxyMiddleware,
   UserInfoProxyMiddleware,
@@ -42,6 +43,11 @@ app.use(BASE_URL + "/user_info", [
 app.use(BASE_URL + "/server", [
   auth_middleware_microservices(),
   ServersProxyMiddleware,
+]);
+
+app.use(BASE_URL + "/channels", [
+  auth_middleware_microservices(),
+  ChannelsProxyMiddleware,
 ]);
 
 app.listen(PORT, () => {
