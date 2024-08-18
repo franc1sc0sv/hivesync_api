@@ -1,9 +1,14 @@
 import { NextFunction, Response } from "express";
-import { API_STATUS, custom_response, StatusCodes } from "hivesync_utils";
+import {
+  API_STATUS,
+  bad_response,
+  custom_response,
+  StatusCodes,
+} from "hivesync_utils";
 
 import RequestServer, { Servers } from "../interfaces/RequestWithServer";
 import { AxiosServerService } from "../config/axios";
-import { getData } from "../utlis/http_request";
+import { getData, headers_by_json } from "../utlis/http_request";
 
 export const IsServerAdmin = async (
   req: RequestServer,
@@ -12,9 +17,7 @@ export const IsServerAdmin = async (
 ) => {
   try {
     const id_server = req.params.id;
-
-    const id_user = req.user.id as string;
-    const token = req.user.token as string;
+    const id_user = req.user?.id as string;
 
     if (!id_server)
       return res.status(401).json(
@@ -30,8 +33,10 @@ export const IsServerAdmin = async (
     const server: Servers = await getData({
       AxiosConfig: AxiosServerService,
       url: `/management/${id_server}`,
-      token: token,
+      headers: headers_by_json({ data: req.user }),
     });
+
+    console.log(server);
 
     if (!server) {
       return res.status(401).json(
@@ -59,14 +64,12 @@ export const IsServerAdmin = async (
 
     req.server = { ...server };
     return next();
-
-    return res.status(401).json({
-      status: "FAILED",
-      data: { message: "No eres administrador del server" },
-    });
   } catch (error) {
-    return res.status(400).json({
-      message: "Hubo un error de autentificacion",
-    });
+    return res.status(500).json(
+      bad_response({
+        data: { error: error },
+        message: "Hubo un error de autentificacion",
+      })
+    );
   }
 };

@@ -1,5 +1,10 @@
 import { NextFunction, Response } from "express";
-import { API_STATUS, custom_response, StatusCodes } from "hivesync_utils";
+import {
+  API_STATUS,
+  bad_response,
+  custom_response,
+  StatusCodes,
+} from "hivesync_utils";
 import { PrismaClient } from "@prisma/client";
 import RequestServer from "../interfaces/RequestWithServer";
 
@@ -18,7 +23,7 @@ export const IsServerAdmin = async (
       return res.status(401).json(
         custom_response({
           data: {
-            message: "Acceso no permitido",
+            message: "ID del server no existe",
           },
           code: StatusCodes.UNAUTHORIZED,
           status: API_STATUS.ACCESS_DENIED,
@@ -33,7 +38,7 @@ export const IsServerAdmin = async (
       return res.status(401).json(
         custom_response({
           data: {
-            message: "Acceso no permitido",
+            message: "No existe el servidor",
           },
           code: StatusCodes.UNAUTHORIZED,
           status: API_STATUS.ACCESS_DENIED,
@@ -55,14 +60,12 @@ export const IsServerAdmin = async (
 
     req.server = { ...server };
     return next();
-
-    return res.status(401).json({
-      status: "FAILED",
-      data: { message: "No eres administrador del server" },
-    });
   } catch (error) {
-    return res.status(400).json({
-      message: "Hubo un error de autentificacion",
-    });
+    return res.status(400).json(
+      bad_response({
+        data: { error: error },
+        message: "Hubo un error de autentificacion",
+      })
+    );
   }
 };

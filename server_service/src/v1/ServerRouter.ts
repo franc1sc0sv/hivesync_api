@@ -13,14 +13,11 @@ const ServerRouter = Router();
 
 ServerRouter.route("/")
   .get([auth_middleware, GetAllServersByUser])
-  .post([auth_middleware, CreateServer])
+  .post([auth_middleware, CreateServer]);
+
+ServerRouter.route("/:id")
+  .get([auth_middleware, IsServerAdmin, GetDataFromSpecificServer])
   .delete([auth_middleware, IsServerAdmin, DeleteServer])
   .patch([auth_middleware, IsServerAdmin, EditInfoServer]);
-
-ServerRouter.route("/:id").get([
-  auth_middleware,
-  IsServerAdmin,
-  GetDataFromSpecificServer,
-]);
 
 export default ServerRouter;

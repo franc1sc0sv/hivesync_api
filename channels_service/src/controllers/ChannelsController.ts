@@ -16,7 +16,6 @@ import { PrismaClient } from "@prisma/client";
 import { ZodError } from "zod";
 
 const prisma = new PrismaClient();
-
 export const CreateChannel = async (req: RequestServer, res: Response) => {
   try {
     const validatedData = CreateChannelSchema.parse(req.body);

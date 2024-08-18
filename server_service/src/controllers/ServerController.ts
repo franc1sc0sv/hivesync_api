@@ -1,11 +1,12 @@
 import { Response } from "express";
 import RequestWithUser from "../interfaces/auth_interface";
-import { PrismaClient } from "@prisma/client";
+import { Categories, PrismaClient } from "@prisma/client";
 import {
   CreateServerSchema,
   EditInfoServerSchema,
 } from "../schemas/serverSchemas";
 import {
+  bad_response,
   detect_zod_error,
   error_response,
   good_response,
@@ -13,11 +14,32 @@ import {
 import { ZodError } from "zod";
 import RequestServer from "../interfaces/RequestWithServer";
 
+import { v4 as uuidv4 } from "uuid";
+import { headers_by_json, postData } from "../utlis/http_request";
+import { AxiosChannelsService } from "../../config/axios";
+import { ChannelsType } from "../types/channels";
+import { ChannelTypeEnum } from "../enums/ChannelType";
+
 const prisma = new PrismaClient();
 
 export const CreateServer = async (req: RequestWithUser, res: Response) => {
   try {
     const validatedData = CreateServerSchema.parse(req.body);
+
+    const existingServer = await prisma.servers.findFirst({
+      where: {
+        name: validatedData.name,
+      },
+    });
+
+    if (existingServer) {
+      return res.status(400).json(
+        bad_response({
+          data: { message: "El nombre del servidor ya está en uso" },
+          message: "Error creando el server",
+        })
+      );
+    }
 
     const server = await prisma.servers.create({
       data: {
@@ -31,16 +53,51 @@ export const CreateServer = async (req: RequestWithUser, res: Response) => {
       },
     });
 
+    const ServerCategories: Categories[] = [
+      { id: uuidv4(), name: "Canales de voz", serverId: server.id },
+      { id: uuidv4(), name: "Canales de texto", serverId: server.id },
+    ];
+
+    await prisma.categories.createMany({
+      data: ServerCategories,
+    });
+
+    const ServerChannels: ChannelsType[] = [
+      {
+        id: uuidv4(),
+        CategoryID: ServerCategories[1].id,
+        name: "general",
+        ServerID: server.id,
+        type: ChannelTypeEnum.VIDEO,
+      },
+      {
+        id: uuidv4(),
+        CategoryID: ServerCategories[1].id,
+        name: "general",
+        ServerID: server.id,
+        type: ChannelTypeEnum.TEXT,
+      },
+    ];
+
+    await postData({
+      AxiosConfig: AxiosChannelsService,
+      data: ServerChannels,
+      url: `/management/many/${server.id}`,
+      headers: headers_by_json({ data: req.user }),
+    });
+
+    const serverURL = `/app/${server.id}/${ServerChannels[0].id}`;
+
     return res.status(201).json(
       good_response({
-        data: server,
+        data: { url: serverURL },
         message: "Servidor creado con éxito",
       })
     );
   } catch (error) {
-    const zod_error = detect_zod_error({ error });
-
     if (error instanceof ZodError) {
+      const zod_error = detect_zod_error({ error });
+
       return res
         .status(400)
         .json(
