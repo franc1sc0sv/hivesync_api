@@ -14,7 +14,6 @@ import { auth_middleware_microservices } from "./middleware/authForMicroservices
 dotenv.config();
 const app = express();
 
-//Config
 app.use(express.json());
 app.use(cors());
 process.env.TZ = "America/El_Salvador";
@@ -23,7 +22,6 @@ const PORT = process.env.PORT || 3000;
 
 const BASE_URL = "/api/v1";
 
-//routes
 app.get("/", (_, res) => {
   res.redirect(BASE_URL);
 });

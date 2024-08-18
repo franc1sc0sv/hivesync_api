@@ -12,7 +12,6 @@ export const auth_middleware_microservices = () => {
   return async (req: RequestWithUser, res: Response, next: NextFunction) => {
     try {
       const auth = req.headers.authorization;
-      console.log(auth);
 
       if (!auth || !auth.startsWith("Bearer")) {
         req.user = {};
@@ -36,6 +35,7 @@ export const auth_middleware_microservices = () => {
       }
 
       req.user = user;
+
       return next();
     } catch (error) {
       return res.status(500).json(

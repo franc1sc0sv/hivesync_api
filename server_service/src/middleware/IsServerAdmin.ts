@@ -12,7 +12,7 @@ export const IsServerAdmin = async (
 ) => {
   try {
     const id_server = req.params.id;
-    const id_user = req.user?.id as string;
+    const id_user = req.headers.user?.id as string;
 
     if (!id_server)
       return res.status(401).json(

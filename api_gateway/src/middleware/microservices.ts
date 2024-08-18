@@ -1,22 +1,38 @@
-import { createProxyMiddleware } from "http-proxy-middleware";
+import { createProxyMiddleware, fixRequestBody } from "http-proxy-middleware";
+import RequestWithUser from "../interfaces/auth_interface";
 
 export const FriendsProxyMiddeware = createProxyMiddleware({
   target: "http://hivesync_api-social_service-1:3000/api/v1",
   changeOrigin: true,
   pathRewrite: { "^/social": "" },
-  logger: console,
+  on: {
+    proxyReq: (proxyReq, req: RequestWithUser) => {
+      proxyReq.setHeader("user", JSON.stringify(req.user));
+      fixRequestBody(proxyReq, req);
+    },
+  },
 });
 
 export const UserInfoProxyMiddleware = createProxyMiddleware({
   target: "http://hivesync_api-user_info_service-1:3000/api/v1",
   changeOrigin: true,
   pathRewrite: { "^/user_info": "" },
-  logger: console,
+  on: {
+    proxyReq: (proxyReq, req: RequestWithUser) => {
+      proxyReq.setHeader("user", JSON.stringify(req.user));
+      fixRequestBody(proxyReq, req);
+    },
+  },
 });
 
 export const ServersProxyMiddleware = createProxyMiddleware({
   target: "http://hivesync_api-server_service-1:3000/api/v1",
   changeOrigin: true,
   pathRewrite: { "^/sever": "" },
-  logger: console,
+  on: {
+    proxyReq: (proxyReq, req: RequestWithUser) => {
+      proxyReq.setHeader("user", JSON.stringify(req.user));
+      fixRequestBody(proxyReq, req);
+    },
+  },
 });
