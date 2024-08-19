@@ -41,12 +41,20 @@ export const CreateServer = async (req: RequestWithUser, res: Response) => {
       );
     }
 
+    const id_channel_text = uuidv4();
+    const id_channel_voice = uuidv4();
+    const id_new_server = uuidv4();
+
+    const serverURL = `/app/${id_new_server}/${id_channel_text}`;
+
     const server = await prisma.servers.create({
       data: {
+        id: id_new_server,
         name: validatedData.name,
         avatarURL: validatedData.avatarURL ?? "",
         id_user: req.user?.id as string,
         privacity: validatedData.privacity,
+        url: serverURL,
         tags: {
           connect: validatedData.tags?.map((tagId) => ({ id: tagId })),
         },
@@ -64,14 +72,14 @@ export const CreateServer = async (req: RequestWithUser, res: Response) => {
 
     const ServerChannels: ChannelsType[] = [
       {
-        id: uuidv4(),
-        CategoryID: ServerCategories[1].id,
+        id: id_channel_voice,
+        CategoryID: ServerCategories[0].id,
         name: "general",
         ServerID: server.id,
         type: ChannelTypeEnum.VIDEO,
       },
       {
-        id: uuidv4(),
+        id: id_channel_text,
         CategoryID: ServerCategories[1].id,
         name: "general",
         ServerID: server.id,
@@ -85,8 +93,6 @@ export const CreateServer = async (req: RequestWithUser, res: Response) => {
       url: `/management/many/${server.id}`,
       headers: headers_by_json({ data: req.user }),
     });
-
-    const serverURL = `/app/${server.id}/${ServerChannels[0].id}`;
 
     return res.status(201).json(
       good_response({
