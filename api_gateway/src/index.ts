@@ -18,7 +18,7 @@ import {
   UserInfoProxyMiddleware,
 } from "./middleware/microservices";
 import { auth_middleware_microservices } from "./middleware/authForMicroservices";
-import { setupSocketIO } from "./utils/socket";
+import { setupSocketIO } from "./utlis/socket";
 
 dotenv.config();
 const app = express();
