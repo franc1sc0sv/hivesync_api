@@ -2,7 +2,7 @@ import { Response } from "express";
 import RequestServer from "../interfaces/RequestWithServer";
 import {
   CreateChannelSchema,
-  CreateManyChannelsSchema,
+  CreateManyChannelSchemAllData,
   DeleteChannelSchema,
   EditChannelSchema,
   GetChannelFromServerSchema,
@@ -71,7 +71,7 @@ export const CreateChannel = async (req: RequestServer, res: Response) => {
 
 export const CreateManyChannels = async (req: RequestServer, res: Response) => {
   try {
-    const validatedData = CreateManyChannelsSchema.parse(req.body);
+    const validatedData = CreateManyChannelSchemAllData.parse(req.body);
     const id_server = req.server?.id;
 
     const channelNames = validatedData.map((channel) => channel.name);
@@ -99,10 +99,7 @@ export const CreateManyChannels = async (req: RequestServer, res: Response) => {
     }
 
     const channels = await prisma.channels.createMany({
-      data: validatedData.map((channel) => ({
-        ...channel,
-        ServerID: id_server as string,
-      })),
+      data: validatedData,
     });
 
     return res.status(201).json(

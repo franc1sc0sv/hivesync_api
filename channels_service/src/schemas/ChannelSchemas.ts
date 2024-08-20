@@ -9,7 +9,18 @@ export const CreateChannelSchema = z.object({
   }),
 });
 
+export const CreateChannelSchemAllData = z.object({
+  id: z.string().uuid(),
+  name: z.string().min(1, "El nombre del canal es requerido"),
+  CategoryID: z.string().uuid("ID de categoría inválido"),
+  ServerID: z.string().uuid(),
+  type: z.nativeEnum(ChannelType, {
+    errorMap: () => ({ message: "Tipo de canal no válida" }),
+  }),
+});
+
 export const CreateManyChannelsSchema = z.array(CreateChannelSchema);
+export const CreateManyChannelSchemAllData = z.array(CreateChannelSchemAllData);
 
 export const DeleteChannelSchema = z.object({
   channelId: z.string().uuid("ID del canal inválido"),

@@ -1,11 +1,5 @@
 import axios from "axios";
 
 export const AxiosSocialService = axios.create({
-    baseURL: "http://social_service:3001"
-})
-
-export const AxiosWorkSpaceService = axios.create({
-    baseURL: ""
-})
-
-
+  baseURL: "http://hivesync_api-social_service-1:3000/api/v1",
+});

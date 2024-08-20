@@ -146,10 +146,11 @@ export const register_controller = async (
     const user_info_data = {
       name: parsed_data_user_info.name,
       id_user: new_user.id,
+      username: new_user.username,
     };
 
     await postData({
-      url: "/info",
+      url: "/user",
       data: user_info_data,
       AxiosConfig: AxiosUserInfoService,
     });

@@ -23,7 +23,7 @@ app.get("/", (_, res) => {
 });
 
 app.use(BASE_URL, default_router);
-app.use(BASE_URL, user_info_router);
+app.use(BASE_URL + "/user", user_info_router);
 
 app.listen(PORT, () => {
   console.log(`USER-INFO_SERVICE initialized in ${PORT}`);

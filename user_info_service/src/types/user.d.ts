@@ -4,6 +4,7 @@ export type UserInfo = {
   profileUrl: string;
   backgroundUrl: string;
   id_user: string;
+  username: String;
 };
 type User = {
   id: string;

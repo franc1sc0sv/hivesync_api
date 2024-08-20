@@ -14,16 +14,17 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Friends {
-  id        String   @id @default(uuid())
-  createdAt DateTime @default(now())
-  friend1   String
-  friend2   String
+enum notificationCategories {
+  request
+  invitation
+  messages
 }
 
-model FriensRequests {
-  id                  String   @id @default(uuid())
-  createdAt           DateTime @default(now())
-  WhoSentTheRequest   String
-  WhoReciveTheRequest String
+model notification {
+  id         String                 @id @default(uuid())
+  message    String
+  category   notificationCategories
+  json_data  Json
+  createdAt  DateTime               @default(now())
+  to_user_id String
 }

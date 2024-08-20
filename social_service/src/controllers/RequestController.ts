@@ -26,19 +26,42 @@ export const CreateRequestController = async (
     );
 
     const WhoSentTheRequest = req.user?.id as string;
+    const WhoReciveTheRequest = validatedData.WhoReciveTheRequest;
 
-    const newRequest = {
-      WhoSentTheRequest: WhoSentTheRequest,
-      WhoReciveTheRequest: validatedData.WhoReciveTheRequest,
-    };
+    const existingRequest = await prisma.friensRequests.findFirst({
+      where: {
+        OR: [
+          {
+            WhoSentTheRequest: WhoSentTheRequest,
+            WhoReciveTheRequest: WhoReciveTheRequest,
+          },
+          {
+            WhoSentTheRequest: WhoReciveTheRequest,
+            WhoReciveTheRequest: WhoSentTheRequest,
+          },
+        ],
+      },
+    });
 
-    const request = await prisma.friensRequests.create({
-      data: newRequest,
+    if (existingRequest) {
+      return res.status(400).json(
+        error_response({
+          data: { message: "Ya existe una solicitud" },
+          message: "Operacion completada",
+        })
+      );
+    }
+
+    const newRequest = await prisma.friensRequests.create({
+      data: {
+        WhoSentTheRequest,
+        WhoReciveTheRequest,
+      },
     });
 
     return res.status(201).json(
       good_response({
-        data: request,
+        data: newRequest,
         message: "Solicitud de amistad enviada",
       })
     );

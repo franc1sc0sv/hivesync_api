@@ -23,7 +23,7 @@ export const GetFriendsByUser = async (req: RequestWithUser, res: Response) => {
 
     return res.status(200).json(
       good_response({
-        data: friends,
+        data: [...friends],
         message: "Lista de amigos obtenida con éxito",
       })
     );
@@ -83,6 +83,78 @@ export const DeleteFriend = async (req: RequestWithUser, res: Response) => {
       error_response({
         data: { error: error },
         message: "Error eliminando amigo",
+      })
+    );
+  }
+};
+
+export const HasAnyRequestOrIsFriendAlready = async (
+  req: RequestWithUser,
+  res: Response
+) => {
+  try {
+    const userId = req.params.userId;
+    const WhoSentTheRequest = req.user?.id as string;
+
+    const isFriend = await prisma.friends.findFirst({
+      where: {
+        OR: [
+          {
+            friend1: WhoSentTheRequest,
+            friend2: userId,
+          },
+          {
+            friend1: userId,
+            friend2: WhoSentTheRequest,
+          },
+        ],
+      },
+    });
+
+    if (isFriend) {
+      return res.status(200).json(
+        error_response({
+          data: {},
+          message: "Ya son amigos.",
+        })
+      );
+    }
+
+    const existingRequest = await prisma.friensRequests.findFirst({
+      where: {
+        OR: [
+          {
+            WhoSentTheRequest: WhoSentTheRequest,
+            WhoReciveTheRequest: userId,
+          },
+          {
+            WhoSentTheRequest: userId,
+            WhoReciveTheRequest: WhoSentTheRequest,
+          },
+        ],
+      },
+    });
+
+    if (existingRequest) {
+      return res.status(200).json(
+        error_response({
+          data: {},
+          message: "Ya existe una solicitud de amistad pendiente.",
+        })
+      );
+    }
+
+    return res.status(200).json(
+      good_response({
+        data: { succes: true },
+        message: "No tiene solicitudes pendientes ni es amigo de este usuario.",
+      })
+    );
+  } catch (error) {
+    return res.status(500).json(
+      error_response({
+        data: { error: error },
+        message: "Error al verificar solicitudes o amistad.",
       })
     );
   }
