@@ -20,4 +20,16 @@ model User {
   username String @unique
   password String
   token    String @default(uuid())
+   messages  Message[]  @relation("UserMessages")
+}
+
+
+model Message {
+  id        String   @id @default(uuid())
+  content   String
+  userId    String
+  room      String
+  createdAt DateTime @default(now())
+
+  User      User     @relation("UserMessages", fields: [userId], references: [id])
 }
