@@ -5,6 +5,7 @@ export const SendFriendRequestSchema = z.object({
 });
 
 export const AcceptFriendRequestSchema = z.object({
+  notificationId: z.string().uuid(),
   requestId: z.string().uuid(),
 });
 
@@ -14,6 +15,7 @@ export const ListFriendsSchema = z.object({
 
 export const RejectFriendRequestSchema = z.object({
   requestId: z.string().uuid(),
+  notificationId: z.string().uuid(),
 });
 
 export const DeleteFriendSchema = z.object({

@@ -13,7 +13,7 @@ import {
 } from "hivesync_utils";
 import { PrismaClient } from "@prisma/client";
 import { ZodError } from "zod";
-import { headers_by_json, postData } from "../utlis/http_request";
+import { deleteData, headers_by_json, postData } from "../utlis/http_request";
 import { AxiosNotificationsService } from "../../config/axios";
 import { NotificationsType } from "../types/notifications";
 
@@ -64,8 +64,8 @@ export const CreateRequestController = async (
 
     const json_data = {
       id_request: newRequest.id,
-      id_who_sent: req.user?.id,
-      username_who_sent: req.user?.username,
+      id_who_sent: req.user?.id ?? "",
+      username_who_sent: req.user?.username ?? "",
       profile_url: req.user?.profileUrl ?? "",
       background_url: req.user?.backgroundUrl ?? "",
     };
@@ -130,8 +130,35 @@ export const RejectRequestController = async (
       );
     }
 
-    await prisma.friensRequests.delete({
+    const deleted_request = await prisma.friensRequests.delete({
       where: { id: validatedData.requestId },
+    });
+
+    await deleteData({
+      AxiosConfig: AxiosNotificationsService,
+      id: validatedData.notificationId,
+      url: "/management",
+      headers: headers_by_json({ data: req.user }),
+    });
+
+    const json_data = {
+      username_who_sent: req.user?.username ?? "",
+      profile_url: req.user?.profileUrl ?? "",
+      background_url: req.user?.backgroundUrl ?? "",
+    };
+
+    const notification: NotificationsType = {
+      category: "request",
+      json_data: JSON.stringify(json_data),
+      message: ` ${req.user?.username} ha rechazado la solicitud`,
+      to_user_id: deleted_request.WhoSentTheRequest,
+    };
+
+    await postData({
+      AxiosConfig: AxiosNotificationsService,
+      data: notification,
+      url: "/management",
+      headers: headers_by_json({ data: req.user }),
     });
 
     return res.status(200).json(
@@ -189,6 +216,33 @@ export const AcceptRequestController = async (
 
     await prisma.friensRequests.delete({
       where: { id: validatedData.requestId },
+    });
+
+    await deleteData({
+      AxiosConfig: AxiosNotificationsService,
+      id: validatedData.notificationId,
+      url: "/management",
+      headers: headers_by_json({ data: req.user }),
+    });
+
+    const json_data = {
+      username_who_sent: req.user?.username ?? "",
+      profile_url: req.user?.profileUrl ?? "",
+      background_url: req.user?.backgroundUrl ?? "",
+    };
+
+    const notification: NotificationsType = {
+      category: "request",
+      json_data: JSON.stringify(json_data),
+      message: ` ${req.user?.username} ha aceptado la solicitud`,
+      to_user_id: newFriendship.friend1,
+    };
+
+    await postData({
+      AxiosConfig: AxiosNotificationsService,
+      data: notification,
+      url: "/management",
+      headers: headers_by_json({ data: req.user }),
     });
 
     return res.status(201).json(

@@ -77,11 +77,11 @@ export const deleteData = async ({
 }: {
   AxiosConfig: AxiosInstance;
   url: string;
-  id: number;
+  id: string;
   headers?: () => Object;
 }) => {
   try {
-    const response = await AxiosConfig.delete(`${url}/?id=${id}`, headers());
+    const response = await AxiosConfig.delete(`${url}/${id}`, headers());
     return response.data.DATA;
   } catch (error) {
     throw error;

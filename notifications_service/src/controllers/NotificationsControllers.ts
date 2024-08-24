@@ -62,6 +62,7 @@ export const GetAllNotificationsByUser = async (
 
     const notifications = await prisma.notification.findMany({
       where: { to_user_id: userId },
+      orderBy: { createdAt: "desc" },
     });
 
     return res.status(200).json(
