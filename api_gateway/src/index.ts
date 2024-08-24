@@ -2,28 +2,25 @@ import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
 import http from "http";
-import { Server as SocketIOServer } from "socket.io";
+// import { Server as SocketIOServer } from "socket.io";
 import chat_router from "./v1/chat_router";
-
-
-
-
 
 import default_router from "./v1/default_router";
 import auth_router from "./v1/auth_router";
 import {
   ChannelsProxyMiddleware,
   FriendsProxyMiddeware,
+  NotificationsProxyMiddleware,
   ServersProxyMiddleware,
   UserInfoProxyMiddleware,
 } from "./middleware/microservices";
 import { auth_middleware_microservices } from "./middleware/authForMicroservices";
-import { setupSocketIO } from "./utlis/socket";
+// import { setupSocketIO } from "./utlis/socket";
 
 dotenv.config();
 const app = express();
 const server = http.createServer(app);
-const io = new SocketIOServer(server);
+// const io = new SocketIOServer(server);
 
 app.use(express.json());
 app.use(cors());
@@ -33,7 +30,7 @@ const PORT = process.env.PORT || 3000;
 const BASE_URL = "/api/v1";
 
 // Setup Socket.IO
-setupSocketIO(io);
+// setupSocketIO(io);
 
 app.get("/", (_, res) => {
   res.redirect(BASE_URL);
@@ -61,9 +58,15 @@ app.use(BASE_URL + "/channels", [
   auth_middleware_microservices(),
   ChannelsProxyMiddleware,
 ]);
+
+app.use(BASE_URL + "/notifications", [
+  auth_middleware_microservices(),
+  NotificationsProxyMiddleware,
+]);
+
 // wea
 app.use(BASE_URL + "/chat", chat_router);
-//aca lo cambie a server pero lo wa subir en una rama nueva mejor, no vaya ser
+
 server.listen(PORT, () => {
   console.log(`API GATEWAY initialized in ${PORT}`);
 });

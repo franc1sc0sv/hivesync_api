@@ -6,6 +6,8 @@ import { bad_response, custom_response, API_STATUS } from "hivesync_utils";
 import { StatusCodes } from "http-status-codes";
 
 import RequestWithUser from "../interfaces/auth_interface";
+import { getData } from "../utlis/http_request";
+import { AxiosUserInfoService } from "../config/axios";
 
 const prisma = new PrismaClient();
 
@@ -38,7 +40,12 @@ export const auth_middleware = () => {
           );
         }
 
-        req.user = user;
+        const user_data = await getData({
+          AxiosConfig: AxiosUserInfoService,
+          url: `/user/${user.id}`,
+        });
+
+        req.user = { ...user, ...user_data };
         return next();
       }
     } catch (error) {

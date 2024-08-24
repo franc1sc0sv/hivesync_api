@@ -11,7 +11,6 @@ export const FriendsProxyMiddeware = createProxyMiddleware({
       fixRequestBody(proxyReq, req);
     },
   },
-  logger: console,
 });
 
 export const UserInfoProxyMiddleware = createProxyMiddleware({
@@ -36,7 +35,6 @@ export const ServersProxyMiddleware = createProxyMiddleware({
       fixRequestBody(proxyReq, req);
     },
   },
-  logger: console,
 });
 
 export const ChannelsProxyMiddleware = createProxyMiddleware({
@@ -49,5 +47,16 @@ export const ChannelsProxyMiddleware = createProxyMiddleware({
       fixRequestBody(proxyReq, req);
     },
   },
-  logger: console,
+});
+
+export const NotificationsProxyMiddleware = createProxyMiddleware({
+  target: "http://hivesync_api-notifications_service-1:3000/api/v1",
+  changeOrigin: true,
+  pathRewrite: { "^/notifications": "" },
+  on: {
+    proxyReq: (proxyReq, req: RequestWithUser) => {
+      proxyReq.setHeader("user", JSON.stringify(req.user));
+      fixRequestBody(proxyReq, req);
+    },
+  },
 });

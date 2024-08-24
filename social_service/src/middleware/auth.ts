@@ -16,7 +16,7 @@ export const auth_middleware = (
   try {
     const user = req.headers.user;
     const formatedUser = JSON.parse(user as string);
-
+    console.log(user);
     if (!formatedUser?.id) {
       return res.status(401).json(
         custom_response({

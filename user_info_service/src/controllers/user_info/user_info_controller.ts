@@ -130,3 +130,58 @@ export const FindUserByNameControllerForFriends = async (
     );
   }
 };
+
+export const GetUserDataByID = async (req: RequestWithUser, res: Response) => {
+  try {
+    const id = req.params.id;
+
+    if (!id) {
+      res.status(500).json(
+        error_response({
+          data: {
+            message: "error con los parametros",
+          },
+        })
+      );
+    }
+
+    const user = await prisma.userInfo.findFirst({
+      where: {
+        id_user: id,
+      },
+      select: {
+        id: false,
+        profileUrl: true,
+        backgroundUrl: true,
+        name: true,
+        createdAt: true,
+        about: true,
+      },
+    });
+
+    return res.status(200).json(
+      good_response({
+        data: { ...user },
+        message: "Usuario encontrado",
+      })
+    );
+  } catch (error) {
+    console.log(error);
+    const zod_error = detect_zod_error({ error });
+    if (zod_error?.error)
+      return res
+        .status(400)
+        .json(
+          error_response({ data: { error: error, message: zod_error.error } })
+        );
+
+    return res.status(500).json(
+      bad_response({
+        data: {
+          message: "error en el servidor",
+          error: error,
+        },
+      })
+    );
+  }
+};

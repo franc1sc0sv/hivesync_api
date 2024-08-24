@@ -5,6 +5,9 @@ import { PrismaClient } from "@prisma/client";
 import { bad_response } from "hivesync_utils";
 
 import RequestWithUser from "../interfaces/auth_interface";
+import { AxiosUserInfoService } from "../config/axios";
+import { getData } from "../utlis/http_request";
+import { User } from "../types/user";
 
 const prisma = new PrismaClient();
 
@@ -14,7 +17,7 @@ export const auth_middleware_microservices = () => {
       const auth = req.headers.authorization;
 
       if (!auth || !auth.startsWith("Bearer")) {
-        req.user = {};
+        req.user = {} as User;
         return next();
       }
 
@@ -30,11 +33,16 @@ export const auth_middleware_microservices = () => {
       });
 
       if (!user) {
-        req.user = {};
+        req.user = {} as User;
         return next();
       }
 
-      req.user = user;
+      const user_data = await getData({
+        AxiosConfig: AxiosUserInfoService,
+        url: `/user/${user.id}`,
+      });
+
+      req.user = { ...user, ...user_data };
 
       return next();
     } catch (error) {

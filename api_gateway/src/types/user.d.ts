@@ -6,4 +6,16 @@ import {
 
 export type UserInputLogin = z.infer<typeof UserInputLoginSc>;
 export type UserInputRegister = z.infer<typeof UserInputRegisterSc>;
-export type User = z.infer<typeof UserSc>;
+
+type User = {
+  id: string;
+  email: string;
+  username: string;
+  password: string;
+  token: string;
+  profileUrl: string;
+  backgroundUrl: string;
+  name: string;
+  createdAt: string;
+  about: string;
+};

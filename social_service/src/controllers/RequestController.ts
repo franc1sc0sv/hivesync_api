@@ -13,6 +13,9 @@ import {
 } from "hivesync_utils";
 import { PrismaClient } from "@prisma/client";
 import { ZodError } from "zod";
+import { headers_by_json, postData } from "../utlis/http_request";
+import { AxiosNotificationsService } from "../../config/axios";
+import { NotificationsType } from "../types/notifications";
 
 const prisma = new PrismaClient();
 
@@ -57,6 +60,29 @@ export const CreateRequestController = async (
         WhoSentTheRequest,
         WhoReciveTheRequest,
       },
+    });
+
+    console.log(req.user);
+
+    const json_data = {
+      id_request: newRequest.id,
+      id_who_sent: req.user?.id,
+      username_who_sent: req.user?.username,
+      profile_url: req.user?.profileUrl ?? "",
+    };
+
+    const notification: NotificationsType = {
+      category: "request",
+      json_data: JSON.stringify({ ...json_data }),
+      message: `${req.user?.username} ha enviado una solicitud de amistad`,
+      to_user_id: WhoReciveTheRequest,
+    };
+
+    await postData({
+      AxiosConfig: AxiosNotificationsService,
+      data: notification,
+      url: "/management",
+      headers: headers_by_json({ data: req.user }),
     });
 
     return res.status(201).json(
