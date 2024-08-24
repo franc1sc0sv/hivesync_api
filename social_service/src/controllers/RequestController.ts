@@ -62,13 +62,12 @@ export const CreateRequestController = async (
       },
     });
 
-    console.log(req.user);
-
     const json_data = {
       id_request: newRequest.id,
       id_who_sent: req.user?.id,
       username_who_sent: req.user?.username,
       profile_url: req.user?.profileUrl ?? "",
+      background_url: req.user?.backgroundUrl ?? "",
     };
 
     const notification: NotificationsType = {
