@@ -11,7 +11,7 @@ import {
   UserInputRegisterSc,
 } from "../../schemas/user.schema";
 
-import { UserInputLogin, UserInputRegister } from "../../types/user";
+import { User, UserInputLogin, UserInputRegister } from "../../types/user";
 
 import RequestWithUser from "../../interfaces/auth_interface";
 
@@ -182,5 +182,5 @@ export const register_controller = async (
 };
 
 export const get_profile_controller = (req: RequestWithUser, res: Response) => {
-  return res.status(200).json(good_response({ data: req.user }));
+  return res.status(200).json(good_response({ data: req.user as User }));
 };

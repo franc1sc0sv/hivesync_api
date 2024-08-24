@@ -8,6 +8,7 @@ import { StatusCodes } from "http-status-codes";
 import RequestWithUser from "../interfaces/auth_interface";
 import { getData } from "../utlis/http_request";
 import { AxiosUserInfoService } from "../config/axios";
+import { User } from "../types/user";
 
 const prisma = new PrismaClient();
 
@@ -45,7 +46,7 @@ export const auth_middleware = () => {
           url: `/user/${user.id}`,
         });
 
-        req.user = { ...user, ...user_data };
+        req.user = { ...user, ...user_data } as User;
         return next();
       }
     } catch (error) {
