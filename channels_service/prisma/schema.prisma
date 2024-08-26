@@ -31,5 +31,6 @@ model messages {
   id       String   @id @default(uuid())
   message  String
   sendAt   DateTime @default(now())
+  id_user  String
   id_inbox String
 }

@@ -93,7 +93,7 @@ export const HasAnyRequestOrIsFriendAlready = async (
   res: Response
 ) => {
   try {
-    const userId = req.params.userId;
+    const userId = req.params.id;
     const WhoSentTheRequest = req.user?.id as string;
 
     const isFriend = await prisma.friends.findFirst({
@@ -111,11 +111,12 @@ export const HasAnyRequestOrIsFriendAlready = async (
       },
     });
 
+    console.log(WhoSentTheRequest, userId);
+
     if (isFriend) {
       return res.status(200).json(
         error_response({
-          data: {},
-          message: "Ya son amigos.",
+          data: { data: { areFriends: true }, message: "Ya son amigos." },
         })
       );
     }
@@ -138,23 +139,27 @@ export const HasAnyRequestOrIsFriendAlready = async (
     if (existingRequest) {
       return res.status(200).json(
         error_response({
-          data: {},
-          message: "Ya existe una solicitud de amistad pendiente.",
+          data: { message: "Ya existe una solicitud de amistad pendiente." },
         })
       );
     }
 
     return res.status(200).json(
       good_response({
-        data: { succes: true },
-        message: "No tiene solicitudes pendientes ni es amigo de este usuario.",
+        data: {
+          succes: true,
+          message:
+            "No tiene solicitudes pendientes ni es amigo de este usuario.",
+        },
       })
     );
   } catch (error) {
     return res.status(500).json(
       error_response({
-        data: { error: error },
-        message: "Error al verificar solicitudes o amistad.",
+        data: {
+          error: error,
+          message: "Error al verificar solicitudes o amistad.",
+        },
       })
     );
   }

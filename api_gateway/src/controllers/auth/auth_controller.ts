@@ -21,7 +21,7 @@ import {
   error_response,
   good_response,
 } from "hivesync_utils";
-import { postData } from "../../utlis/http_request";
+import { getData, postData } from "../../utlis/http_request";
 import { AxiosUserInfoService } from "../../config/axios";
 
 const prisma = new PrismaClient();
@@ -76,9 +76,14 @@ export const login_controller = async (req: RequestWithUser, res: Response) => {
       JWT_SECRET as string
     );
 
+    const user_data = await getData({
+      AxiosConfig: AxiosUserInfoService,
+      url: `/user/${user.id}`,
+    });
+
     return res.status(200).json(
       good_response({
-        data: { ...user, token },
+        data: { ...user, ...user_data, token },
         message: "user l",
       })
     );
