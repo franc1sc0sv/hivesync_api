@@ -3,7 +3,7 @@ import dotenv from "dotenv";
 import cors from "cors";
 import http from "http";
 // import { Server as SocketIOServer } from "socket.io";
-import chat_router from "./v1/chat_router";
+// import chat_router from "./v1/chat_router";
 
 import default_router from "./v1/default_router";
 import auth_router from "./v1/auth_router";
@@ -64,8 +64,8 @@ app.use(BASE_URL + "/notifications", [
   NotificationsProxyMiddleware,
 ]);
 
-// wea
-app.use(BASE_URL + "/chat", chat_router);
+// // wea
+// app.use(BASE_URL + "/chat", chat_router);
 
 server.listen(PORT, () => {
   console.log(`API GATEWAY initialized in ${PORT}`);
