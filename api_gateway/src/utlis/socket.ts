@@ -12,7 +12,7 @@ export const setupSocketIO = (io: SocketIOServer) => {
       console.log(`User ${socket.id} joined room ${room}`);
     });
 
-    socket.on("send_message", async (data) => {
+    socket.on("send_message", async (data:any) => {
       try {
         console.log("a", data);
         const validatedData = data;

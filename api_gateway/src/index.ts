@@ -22,7 +22,6 @@ const app = express();
 
 const server = http.createServer(app);
 const io = new SocketIOServer(server, {
-  transports: ["websocket"],
   cors: {
     origin: "*",
   },
