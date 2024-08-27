@@ -27,10 +27,10 @@ model Channels {
   type       ChannelType
 }
 
-model messages {
-  id       String   @id @default(uuid())
-  message  String
-  sendAt   DateTime @default(now())
-  id_user  String
-  id_inbox String
+model Messages {
+  id        String   @id @default(uuid())
+  message   String
+  id_sender String
+  room      String
+  sendAt    DateTime @default(now())
 }

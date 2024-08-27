@@ -47,6 +47,7 @@ export const ChannelsProxyMiddleware = createProxyMiddleware({
       fixRequestBody(proxyReq, req);
     },
   },
+  logger: console,
 });
 
 export const NotificationsProxyMiddleware = createProxyMiddleware({
