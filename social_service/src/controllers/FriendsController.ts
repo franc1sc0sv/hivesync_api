@@ -116,7 +116,10 @@ export const HasAnyRequestOrIsFriendAlready = async (
     if (isFriend) {
       return res.status(200).json(
         error_response({
-          data: { data: { areFriends: true }, message: "Ya son amigos." },
+          data: {
+            data: { friends: isFriend, areFriends: true },
+            message: "Ya son amigos.",
+          },
         })
       );
     }

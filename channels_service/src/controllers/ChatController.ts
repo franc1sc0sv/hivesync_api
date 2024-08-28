@@ -18,7 +18,7 @@ export const SendMessageController = async (
   try {
     const validatedData = messageSchema.parse(req.body);
     const id_user = req.user?.id as string;
-    console.log(id_user);
+
     const message = await prisma.messages.create({
       data: {
         id_sender: id_user,
@@ -29,7 +29,7 @@ export const SendMessageController = async (
 
     return res.status(200).json(
       good_response({
-        data: { data: message, message: "Mensaje creado con exito" },
+        data: message,
       })
     );
   } catch (error) {
@@ -56,7 +56,6 @@ export const GetMessagesController = async (
 ) => {
   try {
     const room = req.params.id;
-    const source = req.params.source;
 
     if (!room) {
       return res.status(400).json(
@@ -68,15 +67,8 @@ export const GetMessagesController = async (
       );
     }
 
-    const query =
-      source === "SERVER"
-        ? { room: room }
-        : {
-            OR: [{ room: req.user?.id }, { room: room }],
-          };
-
     const messages = await prisma.messages.findMany({
-      where: query,
+      where: { room: room },
     });
 
     return res.status(201).json(

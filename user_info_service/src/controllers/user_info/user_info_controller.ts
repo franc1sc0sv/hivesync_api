@@ -303,9 +303,20 @@ export const GetFriendData = async (req: RequestWithUser, res: Response) => {
       );
     }
 
+    const data = {
+      id_friendship: isFriend?.data.friends.id ?? "",
+      name: user?.name,
+      username: user?.username,
+      about: user?.about,
+      profileUrl: user?.profileUrl,
+      backgroundUrl: user?.backgroundUrl,
+      id_user: user?.id_user,
+      createdAt: user?.createdAt,
+    };
+
     return res.status(200).json(
       good_response({
-        data: { ...user },
+        data: data,
         message: "Usuario encontrado",
       })
     );
