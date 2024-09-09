@@ -5,5 +5,4 @@ COPY package*.json .
 RUN npm i 
 COPY . .
 
-EXPOSE ${CHANNELS_SERVICE_PORT}
 CMD npm run dev
