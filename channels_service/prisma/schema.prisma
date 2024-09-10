@@ -19,6 +19,11 @@ enum ChannelType {
   TEXT
 }
 
+enum CallStatus {
+  PENDING
+  IN_PROGRESS
+}
+
 model Channels {
   id         String      @id @default(uuid())
   name       String
@@ -33,4 +38,21 @@ model Messages {
   id_sender String
   room      String
   sendAt    DateTime @default(now())
+}
+
+model Call {
+  id           String            @id @default(uuid())
+  roomId       String            @unique
+  status       CallStatus        @default(PENDING)
+  startedAt    DateTime          @default(now())
+  participants CallParticipant[]
+}
+
+model CallParticipant {
+  id       String   @id @default(uuid())
+  userId   String
+  callId   String
+  joinedAt DateTime @default(now())
+
+  call Call @relation(fields: [callId], references: [id])
 }
