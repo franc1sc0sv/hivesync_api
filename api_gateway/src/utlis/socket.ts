@@ -1,4 +1,7 @@
 import { Server as SocketIOServer, Socket } from "socket.io";
+import { deleteData, headers_by_json, postData } from "./http_request";
+import { AxiosChannelService } from "../config/axios";
+import { get_data_user } from "./get_data_user";
 
 export const setupSocketIO = (io: SocketIOServer) => {
   const chatNamespace = io.of("/chat");
@@ -16,27 +19,56 @@ export const setupSocketIO = (io: SocketIOServer) => {
 
   const callNamespace = io.of("/call");
 
-  callNamespace.on("connection", (socket) => {
-    console.log("Usuario conectado al namespace de llamadas", socket.id);
+  callNamespace.on("connection", (socket: Socket) => {
+    console.log(`User connected: ${socket.id}`);
 
-    socket.on("join-call", async (roomId: string) => {
+    socket.on("joinCall", async ({ roomId, userId, peerId }) => {
       socket.join(roomId);
-      console.log(`Usuario ${socket.id} se ha unido a la sala ${roomId}`);
+      console.log(`User ${userId} joined call ${roomId}`);
+
+      const user_data = await get_data_user(userId);
+      const data = {
+        roomId: roomId,
+        participants: [userId],
+      };
+
+      try {
+        await postData({
+          AxiosConfig: AxiosChannelService,
+          data: data,
+          url: "/calls",
+          headers: headers_by_json({ data: { ...user_data } }),
+        });
+      } catch (error: any) {
+        console.log(error.response.data);
+      }
+
+      socket.to(roomId).emit("new_peer", { userId, peerId });
     });
 
-    socket.on("offer", (data) => {
-      console.log("Oferta recibida:", data);
-      socket.to(data.roomId).emit("offer", data.offer);
+    socket.on("leaveCall", async ({ roomId, userId }) => {
+      socket.leave(roomId);
+      console.log(`User ${userId} left call ${roomId}`);
+
+      const user_data = await get_data_user(userId);
+      console.log(userId);
+      try {
+        await deleteData({
+          AxiosConfig: AxiosChannelService,
+          id: roomId,
+          url: "/calls",
+          headers: headers_by_json({ data: { ...user_data } }),
+        });
+      } catch (error: any) {
+        console.log(error);
+      }
+
+      // Inform other users in the room about the user leaving
+      socket.to(roomId).emit("peer_left", userId);
     });
 
-    socket.on("answer", (data) => {
-      console.log("Respuesta recibida:", data);
-      socket.to(data.roomId).emit("answer", data.answer);
-    });
-
-    socket.on("ice-candidate", (data) => {
-      console.log("Candidato ICE recibido:", data);
-      socket.to(data.roomId).emit("ice-candidate", data.candidate);
+    socket.on("disconnect", async () => {
+      console.log(`User disconnected: ${socket.id}`);
     });
   });
 };

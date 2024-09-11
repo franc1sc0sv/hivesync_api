@@ -81,7 +81,7 @@ export const deleteData = async ({
   headers?: () => Object;
 }) => {
   try {
-    const response = await AxiosConfig.delete(`${url}/?id=${id}`, headers());
+    const response = await AxiosConfig.delete(`${url}/${id}`, headers());
     return response.data.DATA;
   } catch (error) {
     throw error;

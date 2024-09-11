@@ -13,7 +13,7 @@ const CallsRouter = Router();
 CallsRouter.route("/").post([auth_middleware, CreateCall]);
 
 CallsRouter.route("/:id")
-  .post([auth_middleware, GetCall])
+  .get([auth_middleware, GetCall])
   .delete([auth_middleware, DeleteCall]);
 
 CallsRouter.route("/accept/:id").patch([auth_middleware, AcceptCall]);

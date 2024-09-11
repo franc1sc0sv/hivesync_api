@@ -31,11 +31,9 @@ export const auth_middleware = (
     req.user = formatedUser;
     return next();
   } catch (error) {
-    console.log(error);
     return res.status(500).json(
       bad_response({
-        data: { error: error },
-        message: "error de autentificacion",
+        data: { error: error, message: "error de autentificacion" },
       })
     );
   }

@@ -2,6 +2,7 @@ import { Response } from "express";
 import RequestWithUser from "../interfaces/RequestWithServer";
 
 import {
+  bad_response,
   detect_zod_error,
   error_response,
   good_response,
@@ -24,8 +25,6 @@ export const CreateCall = async (req: RequestWithUser, res: Response) => {
     const call = await prisma.call.create({
       data: {
         roomId: validatedData.roomId,
-        status: CallStatus.PENDING,
-        startedAt: new Date(),
         participants: {
           create: validatedData.participants.map((userId: string) => ({
             userId,
@@ -51,9 +50,8 @@ export const CreateCall = async (req: RequestWithUser, res: Response) => {
       );
     }
     return res.status(500).json(
-      error_response({
-        data: { error: error },
-        message: "Error creando la llamada",
+      bad_response({
+        data: { error: error, message: "Error creando la llamada" },
       })
     );
   }
@@ -63,16 +61,15 @@ export const GetCall = async (req: RequestWithUser, res: Response) => {
   try {
     const callId = req.params.id;
 
-    const call = await prisma.call.findUnique({
-      where: { id: callId },
+    const call = await prisma.call.findFirst({
+      where: { roomId: callId },
       include: { participants: true },
     });
 
     if (!call) {
-      return res.status(404).json(
-        error_response({
+      return res.status(200).json(
+        good_response({
           data: {},
-          message: "Llamada no encontrada",
         })
       );
     }
@@ -80,7 +77,6 @@ export const GetCall = async (req: RequestWithUser, res: Response) => {
     return res.status(200).json(
       good_response({
         data: call,
-        message: "Llamada obtenida con éxito",
       })
     );
   } catch (error) {
@@ -107,13 +103,12 @@ export const DeleteCall = async (req: RequestWithUser, res: Response) => {
     const callId = req.params.id;
 
     await prisma.call.delete({
-      where: { id: callId },
+      where: { roomId: callId },
     });
 
     return res.status(200).json(
       good_response({
-        data: {},
-        message: "Llamada eliminada con éxito",
+        data: { message: "Llamada eliminada con éxito" },
       })
     );
   } catch (error) {
@@ -128,8 +123,7 @@ export const DeleteCall = async (req: RequestWithUser, res: Response) => {
     }
     return res.status(500).json(
       error_response({
-        data: { error: error },
-        message: "Error eliminando la llamada",
+        data: { error: error, message: "Error eliminando la llamada" },
       })
     );
   }
