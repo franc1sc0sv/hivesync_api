@@ -3,7 +3,6 @@ import { PrismaClient } from "@prisma/client";
 import {
   CreateEventSchema,
   EditEventSchema,
-  GetEventFromServerSchema,
 } from "../schemas/eventSchemas";
 import {
   detect_zod_error,
@@ -56,9 +55,12 @@ export const CreateEvent = async (req: RequestServer, res: Response) => {
 
 export const DeleteEvent = async (req: RequestServer, res: Response) => {
   try {
-    const id_server = req.server?.id;
+    // const id_server = req.params.id;
+    const id_event = req.body.event;
+    // const serverId = req.params.id;
+
     await prisma.event.delete({
-      where: { id: id_server },
+      where: { id: id_event },
     });
 
     return res.status(200).json(
@@ -90,9 +92,10 @@ export const EditEvent = async (req: RequestServer, res: Response) => {
   try {
     const validatedData = EditEventSchema.parse(req.body);
     const id_server = req.server?.id as string;
+    const id_event = req.body.eventId;
 
     const updatedEvent = await prisma.event.update({
-      where: { id: id_server },
+      where: { id: id_event },
       data: {
         name: validatedData.name,
         description: validatedData.description,
@@ -131,11 +134,21 @@ export const GetAllEventsFromServer = async (
   res: Response
 ) => {
   try {
-    const serverId = req.server?.id as string;
+    const serverId = req.params.id;
 
     const events = await prisma.event.findMany({
       where: { serverId: serverId },
     });
+
+    if (events.length === 0) {
+      return res.status(200).json(
+        good_response({
+          data: {
+            message: "No se encontraron eventos para este servidor.",
+          },
+        })
+      );
+    }
 
     return res.status(200).json(
       good_response({
@@ -155,19 +168,19 @@ export const GetAllEventsFromServer = async (
 
 export const GetEventFromServer = async (req: RequestServer, res: Response) => {
   try {
-    const validatedData = GetEventFromServerSchema.parse(req.params);
+    const id = req.params.id;
     const serverId = req.server?.id;
 
     const event = await prisma.event.findFirst({
       where: {
-        id: validatedData.eventId,
+        id: id,
         serverId: serverId as string,
       },
     });
 
     if (!event) {
-      return res.status(404).json(
-        error_response({
+      return res.status(200).json(
+        good_response({
           data: {},
           message: "Evento no encontrado",
         })
