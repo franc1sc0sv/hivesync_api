@@ -120,7 +120,7 @@ services:
       - /usr/src/app/node_modules
     networks:
       - hivesync_network
-    
+
   user_info_service:
     build:
       context: ./user_info_service
@@ -168,7 +168,7 @@ services:
       - /usr/src/app/node_modules
     networks:
       - hivesync_network
-    
+
   channels_service:
     build:
       context: ./channels_service
@@ -184,13 +184,15 @@ services:
       - /usr/src/app/node_modules
     networks:
       - hivesync_network
-   
+
   peer_service:
     build:
       context: ./peer_service
       dockerfile: Dockerfile.dev
     ports:
       - "${PEER_PORT}:9001"
+    environment:
+      - DEFAULT_INTERNAL_PORT_PEER=${DEFAULT_INTERNAL_PORT_PEER}
     volumes:
       - ./peer_service:/usr/src/app
       - /usr/src/app/node_modules
