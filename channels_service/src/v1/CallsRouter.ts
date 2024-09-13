@@ -2,9 +2,8 @@ import { Router } from "express";
 import { auth_middleware } from "../middleware/auth";
 import {
   AcceptCall,
-  AddParticipantsToCall,
   CreateCall,
-  DeleteCall,
+  EndCall,
   GetCall,
 } from "../controllers/CalllsControllers";
 
@@ -12,12 +11,10 @@ const CallsRouter = Router();
 
 CallsRouter.route("/").post([auth_middleware, CreateCall]);
 
-CallsRouter.route("/:id")
-  .get([auth_middleware, GetCall])
-  .delete([auth_middleware, DeleteCall]);
+CallsRouter.route("/:id").get([auth_middleware, GetCall]);
 
 CallsRouter.route("/accept/:id").patch([auth_middleware, AcceptCall]);
 
-CallsRouter.route("/add/:id").patch([auth_middleware, AddParticipantsToCall]);
+CallsRouter.route("/end/:id").patch([auth_middleware, EndCall]);
 
 export default CallsRouter;

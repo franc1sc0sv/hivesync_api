@@ -1,5 +1,5 @@
 import { Server as SocketIOServer, Socket } from "socket.io";
-import { deleteData, headers_by_json, postData } from "./http_request";
+import { headers_by_json, patchData, postData } from "./http_request";
 import { AxiosChannelService } from "../config/axios";
 import { get_data_user } from "./get_data_user";
 
@@ -20,55 +20,69 @@ export const setupSocketIO = (io: SocketIOServer) => {
   const callNamespace = io.of("/call");
 
   callNamespace.on("connection", (socket: Socket) => {
-    console.log(`User connected: ${socket.id}`);
+    socket.on(
+      "joinCall",
+      async ({ roomId, userId, peerId, source }, callback) => {
+        socket.join(roomId);
 
-    socket.on("joinCall", async ({ roomId, userId, peerId }) => {
-      socket.join(roomId);
-      console.log(`User ${userId} joined call ${roomId}`);
+        try {
+          const user_data = await get_data_user(userId);
 
-      const user_data = await get_data_user(userId);
-      const data = {
-        roomId: roomId,
-        participants: [userId],
-      };
+          const data = {
+            roomId: roomId,
+            participants: [userId],
+          };
 
-      try {
-        await postData({
-          AxiosConfig: AxiosChannelService,
-          data: data,
-          url: "/calls",
-          headers: headers_by_json({ data: { ...user_data } }),
-        });
-      } catch (error: any) {
-        console.log(error.response.data);
+          const data_accept = {
+            participant: userId,
+          };
+          const call =
+            source === "ANSWER"
+              ? await acceptCallProcess(user_data, data_accept, roomId)
+              : await newCallProcess(user_data, data);
+          callback({ call: call });
+          socket.to(roomId).emit("new_peer", { userId, call, peerId });
+        } catch (error: any) {}
       }
-
-      socket.to(roomId).emit("new_peer", { userId, peerId });
-    });
+    );
 
     socket.on("leaveCall", async ({ roomId, userId }) => {
       socket.leave(roomId);
-      console.log(`User ${userId} left call ${roomId}`);
 
       const user_data = await get_data_user(userId);
-      console.log(userId);
       try {
-        await deleteData({
+        const call = await patchData({
+          data: {},
           AxiosConfig: AxiosChannelService,
           id: roomId,
-          url: "/calls",
+          url: "/calls/end",
           headers: headers_by_json({ data: { ...user_data } }),
         });
-      } catch (error: any) {
-        console.log(error);
-      }
-
-      // Inform other users in the room about the user leaving
-      socket.to(roomId).emit("peer_left", userId);
+        socket.to(roomId).emit("peer_left", { userId, call });
+      } catch (error: any) {}
     });
 
     socket.on("disconnect", async () => {
       console.log(`User disconnected: ${socket.id}`);
     });
+  });
+};
+
+const newCallProcess = async (user_data: any, data: any) => {
+  return await postData({
+    AxiosConfig: AxiosChannelService,
+    data: data,
+    url: "/calls",
+    headers: headers_by_json({ data: { ...user_data } }),
+  });
+};
+
+const acceptCallProcess = async (user_data: any, data: any, roomId: string) => {
+  return await patchData({
+    AxiosConfig: AxiosChannelService,
+    data: data,
+    id: roomId,
+    url: "/calls/accept",
+    headers: headers_by_json({ data: { ...user_data } }),
   });
 };

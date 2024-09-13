@@ -5,8 +5,8 @@ export const CreateCallSchema = z.object({
   participants: z.array(z.string().uuid()),
 });
 
-export const EditCallSchema = z.object({
-  status: z.enum(["PENDING", "IN_PROGRESS", "ENDED"]),
+export const AccepCallSchema = z.object({
+  participant: z.string().uuid(),
 });
 
 export const AddParticipantsSchema = z.object({

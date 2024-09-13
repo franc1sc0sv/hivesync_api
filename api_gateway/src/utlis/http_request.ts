@@ -52,15 +52,11 @@ export const patchData = async ({
   AxiosConfig: AxiosInstance;
   url: string;
   data: any;
-  id: number;
+  id: string;
   headers?: () => Object;
 }) => {
   try {
-    const response = await AxiosConfig.patch(
-      `${url}/?id=${id}`,
-      data,
-      headers()
-    );
+    const response = await AxiosConfig.patch(`${url}/${id}`, data, headers());
     return response.data.DATA;
   } catch (error) {
     throw error;
