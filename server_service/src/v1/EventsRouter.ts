@@ -11,16 +11,16 @@ import {
 
 const EventsRouter = Router();
 
-EventsRouter.route("/")
-  .get([auth_middleware, IsServerAdmin, GetAllEventsFromServer])
-  .post([auth_middleware, IsServerAdmin, CreateEvent])
-  .delete([auth_middleware, IsServerAdmin, DeleteEvent])
-  .patch([auth_middleware, IsServerAdmin, EditEvent]);
+// EventsRouter.route("/")
 
-EventsRouter.route("/:id").get([
-  auth_middleware,
-  IsServerAdmin,
-  GetEventFromServer,
-]);
+EventsRouter.route("/:id")
+  .get([auth_middleware, IsServerAdmin, GetEventFromServer,])
+  .post([auth_middleware, IsServerAdmin, CreateEvent])
+  .patch([auth_middleware, IsServerAdmin, EditEvent])
+  .delete([auth_middleware, IsServerAdmin, DeleteEvent]);
+
+EventsRouter.route("/get_many/:id")
+  .get([auth_middleware, IsServerAdmin, GetAllEventsFromServer]);
+
 
 export default EventsRouter;
