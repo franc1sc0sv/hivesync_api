@@ -168,18 +168,19 @@ export const GetAllEventsFromServer = async (
 
 export const GetEventFromServer = async (req: RequestServer, res: Response) => {
   try {
-    const id = req.params.id;
-    const serverId = req.server?.id;
+    // const id = req.params.id;
+    // const serverId = req.server?.id;
+
+    const eventId = req.body.eventId;
 
     const event = await prisma.event.findFirst({
       where: {
-        id: id,
-        serverId: serverId as string,
+        id: eventId
       },
     });
 
     if (!event) {
-      return res.status(200).json(
+      return res.status(404).json(
         good_response({
           data: {},
           message: "Evento no encontrado",
