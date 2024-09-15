@@ -20,37 +20,50 @@ export const setupSocketIO = (io: SocketIOServer) => {
   const callNamespace = io.of("/call");
 
   callNamespace.on("connection", (socket: Socket) => {
-    socket.on(
-      "joinCall",
-      async ({ roomId, userId, peerId, source }, callback) => {
+    socket.on("joinCall", async ({ data, source }, callback) => {
+      try {
+        const { IsCameraActive, isMicrofoneActive, roomId, userId }: InputData =
+          data;
         socket.join(roomId);
 
-        try {
-          const user_data = await get_data_user(userId);
+        const user_data = await get_data_user(userId);
 
-          const data = {
-            roomId: roomId,
-            participants: [userId],
-          };
+        const data_call: Call = {
+          roomId: roomId,
+          participants: [
+            {
+              IsCameraActive,
+              isMicrofoneActive,
+              userId,
+            },
+          ],
+          creator_id: userId,
+        };
 
-          const data_accept = {
-            participant: userId,
-          };
-          const call =
-            source === "ANSWER"
-              ? await acceptCallProcess(user_data, data_accept, roomId)
-              : await newCallProcess(user_data, data);
-          callback({ call: call });
-          socket.to(roomId).emit("new_peer", { userId, call, peerId });
-        } catch (error: any) {}
+        const data_accept: AcceptCall = {
+          participant: userId,
+          IsCameraActive,
+          isMicrofoneActive,
+        };
+
+        const call =
+          source === "ANSWER"
+            ? await acceptCallProcess(user_data, data_accept, roomId)
+            : await newCallProcess(user_data, data_call);
+
+        console.log(call);
+
+        callback({ call: call });
+        socket.to(roomId).emit("new_peer", { call });
+      } catch (error: any) {
+        console.log(error);
       }
-    );
+    });
 
-    socket.on("leaveCall", async ({ roomId, userId }) => {
-      socket.leave(roomId);
-
-      const user_data = await get_data_user(userId);
+    socket.on("leaveCall", async ({ roomId, userId }, callback) => {
       try {
+        socket.leave(roomId);
+        const user_data = await get_data_user(userId);
         const call = await patchData({
           data: {},
           AxiosConfig: AxiosChannelService,
@@ -58,8 +71,34 @@ export const setupSocketIO = (io: SocketIOServer) => {
           url: "/calls/end",
           headers: headers_by_json({ data: { ...user_data } }),
         });
+        callback({ call: call });
         socket.to(roomId).emit("peer_left", { userId, call });
       } catch (error: any) {}
+    });
+
+    socket.on("updateParams", async ({ data }, callback) => {
+      try {
+        const { IsCameraActive, isMicrofoneActive, roomId, userId }: InputData =
+          data;
+        socket.join(roomId);
+        const user_data = await get_data_user(userId);
+
+        const participant = await patchData({
+          data: {
+            isMicrofoneActive: isMicrofoneActive,
+            IsCameraActive: IsCameraActive,
+          },
+          AxiosConfig: AxiosChannelService,
+          id: roomId,
+          url: "/calls/status",
+          headers: headers_by_json({ data: { ...user_data } }),
+        });
+
+        callback({ participant });
+        socket.to(roomId).emit("newUsersParams", { participant, userId });
+      } catch (error) {
+        console.log(error);
+      }
     });
 
     socket.on("disconnect", async () => {
@@ -85,4 +124,27 @@ const acceptCallProcess = async (user_data: any, data: any, roomId: string) => {
     url: "/calls/accept",
     headers: headers_by_json({ data: { ...user_data } }),
   });
+};
+
+type Call = {
+  creator_id: string;
+  roomId: string;
+  participants: {
+    userId: string;
+    isMicrofoneActive: boolean;
+    IsCameraActive: boolean;
+  }[];
+};
+
+type AcceptCall = {
+  participant: string;
+  isMicrofoneActive: boolean;
+  IsCameraActive: boolean;
+};
+
+type InputData = {
+  IsCameraActive: boolean;
+  isMicrofoneActive: boolean;
+  userId: string;
+  roomId: string;
 };

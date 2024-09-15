@@ -5,6 +5,7 @@ import {
   CreateCall,
   EndCall,
   GetCall,
+  updateParticipantStatus,
 } from "../controllers/CalllsControllers";
 
 const CallsRouter = Router();
@@ -16,5 +17,10 @@ CallsRouter.route("/:id").get([auth_middleware, GetCall]);
 CallsRouter.route("/accept/:id").patch([auth_middleware, AcceptCall]);
 
 CallsRouter.route("/end/:id").patch([auth_middleware, EndCall]);
+
+CallsRouter.route("/status/:id").patch([
+  auth_middleware,
+  updateParticipantStatus,
+]);
 
 export default CallsRouter;

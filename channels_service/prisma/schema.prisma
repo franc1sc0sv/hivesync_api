@@ -27,17 +27,23 @@ model Messages {
 model Call {
   id           String            @id @default(uuid())
   roomId       String            @unique
+  creator_id   String
   status       CallStatus        @default(PENDING)
   startedAt    DateTime          @default(now())
   participants CallParticipant[]
 }
 
 model CallParticipant {
-  id       String   @id @default(uuid())
-  userId   String
-  callId   String
+  id     String @id @default(uuid())
+  userId String
+  callId String
+
+  isMicrofoneActive Boolean
+  IsCameraActive    Boolean
+
   joinedAt DateTime @default(now())
-  call     Call     @relation(fields: [callId], references: [id], onDelete: Cascade)
+
+  call Call @relation(fields: [callId], references: [id], onDelete: Cascade)
 }
 
 enum ChannelType {

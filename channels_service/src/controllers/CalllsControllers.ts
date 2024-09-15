@@ -10,7 +10,11 @@ import {
 
 import { PrismaClient, CallStatus } from "@prisma/client";
 
-import { CreateCallSchema, AccepCallSchema } from "../schemas/CallsSchema";
+import {
+  CreateCallSchema,
+  AccepCallSchema,
+  ParticipantParamsSchema,
+} from "../schemas/CallsSchema";
 import { ZodError } from "zod";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 
@@ -43,13 +47,13 @@ export const CreateCall = async (req: RequestWithUser, res: Response) => {
 
     const call = await prisma.call.create({
       data: {
+        creator_id: validatedData.creator_id,
         roomId: validatedData.roomId,
         participants: {
-          create: validatedData.participants.map((userId: string) => ({
-            userId,
-          })),
+          create: validatedData.participants.map((x) => x),
         },
       },
+      include: { participants: true },
     });
 
     return res.status(201).json(
@@ -159,11 +163,12 @@ export const EndCall = async (req: RequestWithUser, res: Response) => {
         status: callStatus,
       },
       where: { roomId: callId },
+      include: { participants: true },
     });
 
     return res.status(200).json(
       good_response({
-        data: { data: updateCall, message: "Llamada terminado con éxito" },
+        data: updateCall,
       })
     );
   } catch (error) {
@@ -210,13 +215,18 @@ export const AcceptCall = async (req: RequestWithUser, res: Response) => {
       },
     });
 
-    const newParticipantOnCall = await prisma.callParticipant.create({
-      data: { userId: validatedData.participant, callId: updatedCall.id },
+    await prisma.callParticipant.create({
+      data: {
+        userId: validatedData.participant,
+        callId: updatedCall.id,
+        IsCameraActive: validatedData.IsCameraActive,
+        isMicrofoneActive: validatedData.isMicrofoneActive,
+      },
     });
 
     return res.status(200).json(
       good_response({
-        data: { ...updatedCall, ...newParticipantOnCall },
+        data: updatedCall,
         message: "Llamada actualizada con éxito",
       })
     );
@@ -243,55 +253,61 @@ export const AcceptCall = async (req: RequestWithUser, res: Response) => {
   }
 };
 
-// export const AddParticipantsToCall = async (
-//   req: RequestWithUser,
-//   res: Response
-// ) => {
-//   try {
-//     const validatedData = AddParticipantsSchema.parse(req.body);
-//     const callId = req.params.callId;
+export const updateParticipantStatus = async (
+  req: RequestWithUser,
+  res: Response
+) => {
+  try {
+    const callId = req.params.id;
+    const validatedData = ParticipantParamsSchema.parse(req.body);
 
-//     const call = await prisma.call.findUnique({
-//       where: { id: callId },
-//     });
+    const existingParticipant = await prisma.callParticipant.findFirst({
+      where: {
+        AND: [{ callId: callId, userId: req.user?.id }],
+      },
+    });
 
-//     if (!call) {
-//       return res.status(404).json(
-//         error_response({
-//           data: {},
-//           message: "Llamada no encontrada",
-//         })
-//       );
-//     }
+    if (!existingParticipant) {
+      return res.status(200).json(
+        good_response({
+          data: { message: "No existe" },
+        })
+      );
+    }
 
-//     const participants = await prisma.callParticipant.createMany({
-//       data: validatedData.participants.map((userId) => ({
-//         callId,
-//         userId,
-//       })),
-//     });
+    const updatedParticipantOnCall = await prisma.callParticipant.update({
+      where: { id: existingParticipant.id },
+      data: {
+        IsCameraActive: validatedData.IsCameraActive,
+        isMicrofoneActive: validatedData.isMicrofoneActive,
+      },
+    });
 
-//     return res.status(200).json(
-//       good_response({
-//         data: participants,
-//         message: "Participantes añadidos con éxito",
-//       })
-//     );
-//   } catch (error) {
-//     const zod_error = detect_zod_error({ error });
+    return res.status(200).json(
+      good_response({
+        data: { ...updatedParticipantOnCall },
+        message: "Estados Actualizados con exito",
+      })
+    );
+  } catch (error) {
+    const zod_error = detect_zod_error({ error });
 
-//     if (error instanceof ZodError) {
-//       return res.status(400).json(
-//         error_response({
-//           data: { error: error, message: zod_error?.error },
-//         })
-//       );
-//     }
-//     return res.status(500).json(
-//       error_response({
-//         data: { error: error },
-//         message: "Error añadiendo participantes a la llamada",
-//       })
-//     );
-//   }
-// };
+    if (error instanceof PrismaClientKnownRequestError) {
+      console.log(error.message);
+    }
+
+    if (error instanceof ZodError) {
+      return res.status(400).json(
+        error_response({
+          data: { error: error, message: zod_error?.error },
+        })
+      );
+    }
+    return res.status(500).json(
+      error_response({
+        data: { error: error },
+        message: "Error actualizando la llamada",
+      })
+    );
+  }
+};
