@@ -91,11 +91,10 @@ export const headers_by_json = ({ data }: { data: any }) => {
 };
 
 export const headers_by_token = ({ token }: { token: string }) => {
-  return () => {
-    return {
-      headers: {
-        Authorization: "Bearer " + token,
-      },
-    };
-  };
+  return () => ({
+    headers: {
+      Authorization: "Bearer " + token,
+    },
+  });
 };
+

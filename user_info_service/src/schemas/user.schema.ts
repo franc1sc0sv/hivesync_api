@@ -15,3 +15,9 @@ export const UserInput = z.object({
     .string({ required_error: "username requerido" })
     .min(2, { message: "username  min length" }),
 });
+
+export const ColorInputSc = z
+  .string()
+  .regex(/^#?([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/, {
+    message: "Debe ser un color hexadecimal válido",
+  });

@@ -6,6 +6,7 @@ import { Server as SocketIOServer } from "socket.io";
 
 import default_router from "./v1/default_router";
 import auth_router from "./v1/auth_router";
+import edit_user_data_router from "./v1/edit_user_data_router";
 import {
   ChannelsProxyMiddleware,
   FriendsProxyMiddeware,
@@ -42,6 +43,7 @@ app.get("/", (_, res) => {
 
 app.use(BASE_URL, default_router);
 app.use(BASE_URL + "/auth", auth_router);
+app.use(BASE_URL + "/edit", edit_user_data_router);
 
 app.use(BASE_URL + "/social", [
   auth_middleware_microservices(),
