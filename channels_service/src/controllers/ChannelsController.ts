@@ -287,3 +287,36 @@ export const GetChannelFromServer = async (
     );
   }
 };
+
+export const DeleteManyChannels = async (req: RequestServer, res: Response) => {
+  try {
+    const id_categorie = req.params.id;
+
+    await prisma.channels.deleteMany({
+      where: { CategoryID: id_categorie },
+    });
+
+    return res.status(200).json(
+      good_response({
+        data: {},
+        message: "Canal eliminado con éxito",
+      })
+    );
+  } catch (error) {
+    const zod_error = detect_zod_error({ error });
+
+    if (error instanceof ZodError) {
+      return res.status(400).json(
+        error_response({
+          data: { error: error, message: zod_error?.error },
+        })
+      );
+    }
+    return res.status(500).json(
+      error_response({
+        data: { error: error },
+        message: "Error eliminando el canal",
+      })
+    );
+  }
+};

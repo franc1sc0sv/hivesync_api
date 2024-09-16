@@ -10,6 +10,8 @@ import {
 } from "hivesync_utils";
 import { ZodError } from "zod";
 import RequestServer from "../interfaces/RequestWithServer";
+import { deleteData, headers_by_json } from "../utlis/http_request";
+import { AxiosChannelsService } from "../../config/axios";
 
 const prisma = new PrismaClient();
 
@@ -66,6 +68,13 @@ export const DeleteCategory = async (req: RequestWithUser, res: Response) => {
       where: { id: id },
     });
 
+    await deleteData({
+      AxiosConfig: AxiosChannelsService,
+      url: `/management/many`,
+      headers: headers_by_json({ data: req.user }),
+      id: id,
+    });
+
     return res.status(200).json(
       good_response({
         data: {},
@@ -91,13 +100,13 @@ export const DeleteCategory = async (req: RequestWithUser, res: Response) => {
   }
 };
 
-export const EditCategory = async (req: RequestServer, res: Response) => {
+export const EditCategory = async (req: RequestWithUser, res: Response) => {
   try {
     const validatedData = CategorySchema.parse(req.body);
-    const id_server = req.server?.id;
+    const id_categorie = req.params?.id;
 
     const updatedCategory = await prisma.categories.update({
-      where: { id: id_server },
+      where: { id: id_categorie },
       data: {
         name: validatedData.name,
       },
@@ -150,6 +159,30 @@ export const GetAllCategoriesByServer = async (
       error_response({
         data: { error: error },
         message: "Error obteniendo la lista de categorías",
+      })
+    );
+  }
+};
+
+export const GetCategorie = async (req: RequestWithUser, res: Response) => {
+  try {
+    const id_categorie = req.params.id;
+    const categorie = await prisma.categories.findFirst({
+      where: { id: id_categorie },
+    });
+
+    return res.status(200).json(
+      good_response({
+        data: { categorie },
+      })
+    );
+  } catch (error) {
+    return res.status(500).json(
+      error_response({
+        data: {
+          error: error,
+          message: "Error obteniendo la lista de categorías",
+        },
       })
     );
   }

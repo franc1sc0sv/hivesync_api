@@ -5,6 +5,7 @@ import {
   CreateChannel,
   CreateManyChannels,
   DeleteChannel,
+  DeleteManyChannels,
   EditChannels,
   GetChannelFromServer,
   GetManyChannelsFromServer,
@@ -20,6 +21,7 @@ ChannelsRouter.route("/:id")
 
 ChannelsRouter.route("/many/:id")
   .post([auth_middleware, IsServerAdmin, CreateManyChannels])
-  .get([auth_middleware, IsServerAdmin, GetManyChannelsFromServer]);
+  .get([auth_middleware, IsServerAdmin, GetManyChannelsFromServer])
+  .delete([auth_middleware, DeleteManyChannels]);
 
 export default ChannelsRouter;
