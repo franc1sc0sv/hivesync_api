@@ -3,6 +3,8 @@ import {
   CreateServer,
   DeleteServer,
   EditInfoServer,
+  editServerName,
+  editBackgroundColor,
   GetAllServersByUser,
   GetBasicDataFromSpecificServer,
   GetDataFromSpecificServer,
@@ -20,6 +22,10 @@ ServerRouter.route("/:id")
   .get([auth_middleware, IsServerAdmin, GetDataFromSpecificServer])
   .delete([auth_middleware, IsServerAdmin, DeleteServer])
   .patch([auth_middleware, IsServerAdmin, EditInfoServer]);
+
+ServerRouter.route("/edit/name/:id").patch([auth_middleware, IsServerAdmin, editServerName]);
+ServerRouter.route("/edit/cover/:id").patch([auth_middleware, IsServerAdmin, editBackgroundColor]);
+
 
 ServerRouter.route("/basic/:id").get([
   auth_middleware,

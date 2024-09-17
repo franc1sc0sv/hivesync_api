@@ -14,3 +14,17 @@ export const EditInfoServerSchema = z.object({
   name: z.string().min(1, "El nombre del servidor es requerido").optional(),
   privacity: z.nativeEnum(PrivacityServer).optional(),
 });
+
+export const EditServerNameSchema = z.object({
+  name: z.string().min(1, "El nombre del servidor es requerido").optional(),
+});
+
+
+export const EditServerCoverSchema = z.object({
+  color: z.string().regex(/^#([0-9a-fA-F]{6}|[0-9a-fA-F]{3})$/, {
+    message: "Color hexadecimal invalido",
+  }),
+});
+
+
+

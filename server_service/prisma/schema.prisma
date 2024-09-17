@@ -9,13 +9,14 @@ datasource db {
 }
 
 model Servers {
-  id        String          @id @default(uuid())
-  name      String
-  avatarURL String
-  privacity PrivacityServer
-  id_user   String
-  createdAt DateTime        @default(now())
-  url       String
+  id            String          @id @default(uuid())
+  name          String
+  avatarURL     String
+  privacity     PrivacityServer
+  id_user       String
+  createdAt     DateTime        @default(now())
+  url           String
+  backgroundUrl String          @default("#382C6C")
 
   categories Categories[]    @relation("ServerCategories")
   events     Event[]         @relation("ServerEvents")
@@ -29,14 +30,14 @@ model Event {
   description String
   date        DateTime
   serverId    String
-  server      Servers  @relation("ServerEvents", fields: [serverId], references: [id])
+  server      Servers  @relation("ServerEvents", fields: [serverId], references: [id], onDelete: Cascade)
 }
 
 model Categories {
   id       String  @id @default(uuid())
   name     String
   serverId String
-  Servers  Servers @relation("ServerCategories", fields: [serverId], references: [id])
+  Servers  Servers @relation("ServerCategories", fields: [serverId], references: [id], onDelete: Cascade)
 }
 
 model Tags {
@@ -52,7 +53,7 @@ model ServerMembers {
   role      String
   joinedAt  DateTime @default(now())
   serverId  String
-  server    Servers  @relation("ServerMemberships", fields: [serverId], references: [id])
+  server    Servers  @relation("ServerMemberships", fields: [serverId], references: [id], onDelete: Cascade)
 }
 
 enum PrivacityServer {
