@@ -1,6 +1,6 @@
 import RequestWithUser from "./auth_interface";
 
-enum PrivacityServer {
+export enum PrivacityServer {
   PUBLIC = "PUBLIC",
   PRIVATE = "PRIVATE",
 }

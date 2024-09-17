@@ -55,8 +55,14 @@ export const CreateServer = async (req: RequestWithUser, res: Response) => {
         id_user: req.user?.id as string,
         privacity: validatedData.privacity,
         url: serverURL,
-        tags: {
-          connect: validatedData.tags?.map((tagId) => ({ id: tagId })),
+        members: {
+          create: [
+            {
+              id_user: req.user?.id as string,
+              role: "ADMIN",
+              isActiveInServer: true,
+            },
+          ],
         },
       },
     });
@@ -192,15 +198,21 @@ export const GetAllServersByUser = async (
   res: Response
 ) => {
   try {
-    const servers = await prisma.servers.findMany({
+    const servers = await prisma.serverMembers.findMany({
       where: {
         id_user: req.user?.id as string,
+        isActiveInServer: true,
+      },
+      include: {
+        server: true,
       },
     });
 
+    const servers_formated = servers.map((member) => member.server);
+
     return res.status(200).json(
       good_response({
-        data: servers,
+        data: servers_formated,
         message: "Lista de servidores obtenida con éxito",
       })
     );
@@ -223,7 +235,6 @@ export const GetDataFromSpecificServer = async (
     const server = await prisma.servers.findFirst({
       where: { id: id_server },
       include: {
-        tags: true,
         categories: true,
         events: true,
         members: true,
@@ -241,7 +252,7 @@ export const GetDataFromSpecificServer = async (
     const channels = await getData({
       AxiosConfig: AxiosChannelsService,
       url: `/management/many/${server.id}`,
-      headers: headers_by_json({ data: req?.user }),
+      headers: headers_by_json({ data: req.user }),
     });
 
     return res.status(200).json(
@@ -250,9 +261,8 @@ export const GetDataFromSpecificServer = async (
         message: "Datos del servidor obtenidos con éxito",
       })
     );
-  } catch (error) {
+  } catch (error: any) {
     const zod_error = detect_zod_error({ error });
-    console.log(error);
     if (error instanceof ZodError) {
       return res
         .status(400)
@@ -277,6 +287,11 @@ export const GetBasicDataFromSpecificServer = async (
     const id_server = req.server?.id;
     const server = await prisma.servers.findFirst({
       where: { id: id_server },
+      include: {
+        categories: true,
+        events: true,
+        members: true,
+      },
     });
 
     if (!server) {

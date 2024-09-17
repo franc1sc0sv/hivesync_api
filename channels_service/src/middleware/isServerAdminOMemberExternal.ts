@@ -5,12 +5,12 @@ import {
   custom_response,
   StatusCodes,
 } from "hivesync_utils";
-
 import RequestServer, { Servers } from "../interfaces/RequestWithServer";
-import { AxiosServerService } from "../config/axios";
 import { getData, headers_by_json } from "../utlis/http_request";
+import { AxiosServerService } from "../config/axios";
+import { Server } from "../types/server";
 
-export const IsServerAdmin = async (
+export const IsServerAdminOrMemberExternal = async (
   req: RequestServer,
   res: Response,
   next: NextFunction
@@ -19,18 +19,19 @@ export const IsServerAdmin = async (
     const id_server = req.params.id;
     const id_user = req.user?.id as string;
 
-    if (!id_server)
+    if (!id_server) {
       return res.status(401).json(
         custom_response({
           data: {
-            message: "Acceso no permitido",
+            message: "ID del servidor no existe",
           },
           code: StatusCodes.UNAUTHORIZED,
           status: API_STATUS.ACCESS_DENIED,
         })
       );
+    }
 
-    const server: Servers = await getData({
+    const server: Server = await getData({
       AxiosConfig: AxiosServerService,
       url: `/management/basic/${id_server}`,
       headers: headers_by_json({ data: req.user }),
@@ -40,7 +41,7 @@ export const IsServerAdmin = async (
       return res.status(401).json(
         custom_response({
           data: {
-            message: "Acceso no permitido",
+            message: "El servidor no existe",
           },
           code: StatusCodes.UNAUTHORIZED,
           status: API_STATUS.ACCESS_DENIED,
@@ -48,26 +49,43 @@ export const IsServerAdmin = async (
       );
     }
 
-    if (server.id_user !== id_user) {
-      return res.status(401).json(
+    const server_to_send: Servers = {
+      id: server.id,
+      name: server.name,
+      avatarURL: server.avatarURL,
+      privacity: server.privacity,
+      id_user: server.id_user,
+      createdAt: new Date(server.createdAt),
+    };
+
+    if (server.id_user === id_user) {
+      req.server = { ...server_to_send };
+      return next();
+    }
+
+    const isMember = server.members.filter(
+      (member) => member.id_user === id_server
+    );
+
+    if (!isMember) {
+      return res.status(403).json(
         custom_response({
           data: {
-            message: "Acceso no permitido",
+            message: "Acceso denegado, no eres miembro del servidor",
           },
-          code: StatusCodes.UNAUTHORIZED,
+          code: StatusCodes.FORBIDDEN,
           status: API_STATUS.ACCESS_DENIED,
         })
       );
     }
 
-    req.server = { ...server };
+    req.server = { ...server_to_send };
     return next();
   } catch (error) {
-    console.log(error);
-    return res.status(500).json(
+    return res.status(400).json(
       bad_response({
         data: { error: error },
-        message: "Hubo un error de autentificacion",
+        message: "Hubo un error de autenticación",
       })
     );
   }

@@ -9,6 +9,7 @@ import {
 } from "../controllers/ServerController";
 import { auth_middleware } from "../middleware/auth";
 import { IsServerAdmin } from "../middleware/IsServerAdmin";
+import { IsServerAdminOrMember } from "../middleware/IsServerAdminOrMember";
 
 const ServerRouter = Router();
 
@@ -17,13 +18,13 @@ ServerRouter.route("/")
   .post([auth_middleware, CreateServer]);
 
 ServerRouter.route("/:id")
-  .get([auth_middleware, IsServerAdmin, GetDataFromSpecificServer])
+  .get([auth_middleware, IsServerAdminOrMember, GetDataFromSpecificServer])
   .delete([auth_middleware, IsServerAdmin, DeleteServer])
   .patch([auth_middleware, IsServerAdmin, EditInfoServer]);
 
 ServerRouter.route("/basic/:id").get([
   auth_middleware,
-  IsServerAdmin,
+  IsServerAdminOrMember,
   GetBasicDataFromSpecificServer,
 ]);
 export default ServerRouter;

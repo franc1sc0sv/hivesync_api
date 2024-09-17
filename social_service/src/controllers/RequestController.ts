@@ -65,9 +65,7 @@ export const CreateRequestController = async (
     const json_data = {
       id_request: newRequest.id,
       id_who_sent: req.user?.id ?? "",
-      username_who_sent: req.user?.username ?? "",
-      profile_url: req.user?.profileUrl ?? "",
-      background_url: req.user?.backgroundUrl ?? "",
+      user: { ...req.user },
     };
 
     const notification: NotificationsType = {
@@ -142,13 +140,11 @@ export const RejectRequestController = async (
     });
 
     const json_data = {
-      username_who_sent: req.user?.username ?? "",
-      profile_url: req.user?.profileUrl ?? "",
-      background_url: req.user?.backgroundUrl ?? "",
+      user: { ...req.user },
     };
 
     const notification: NotificationsType = {
-      category: "request",
+      category: "messages",
       json_data: JSON.stringify(json_data),
       message: ` ${req.user?.username} ha rechazado la solicitud`,
       to_user_id: deleted_request.WhoSentTheRequest,
@@ -226,13 +222,11 @@ export const AcceptRequestController = async (
     });
 
     const json_data = {
-      username_who_sent: req.user?.username ?? "",
-      profile_url: req.user?.profileUrl ?? "",
-      background_url: req.user?.backgroundUrl ?? "",
+      user: { ...req.user },
     };
 
     const notification: NotificationsType = {
-      category: "request",
+      category: "messages",
       json_data: JSON.stringify(json_data),
       message: ` ${req.user?.username} ha aceptado la solicitud`,
       to_user_id: newFriendship.friend1,

@@ -5,12 +5,12 @@ import {
   custom_response,
   StatusCodes,
 } from "hivesync_utils";
+import { PrismaClient } from "@prisma/client";
+import RequestServer from "../interfaces/RequestWithServer";
 
-import RequestServer, { Servers } from "../interfaces/RequestWithServer";
-import { AxiosServerService } from "../config/axios";
-import { getData, headers_by_json } from "../utlis/http_request";
+const prisma = new PrismaClient();
 
-export const IsServerAdmin = async (
+export const IsServerAdminOrMember = async (
   req: RequestServer,
   res: Response,
   next: NextFunction
@@ -19,28 +19,11 @@ export const IsServerAdmin = async (
     const id_server = req.params.id;
     const id_user = req.user?.id as string;
 
-    if (!id_server)
+    if (!id_server) {
       return res.status(401).json(
         custom_response({
           data: {
-            message: "Acceso no permitido",
-          },
-          code: StatusCodes.UNAUTHORIZED,
-          status: API_STATUS.ACCESS_DENIED,
-        })
-      );
-
-    const server: Servers = await getData({
-      AxiosConfig: AxiosServerService,
-      url: `/management/basic/${id_server}`,
-      headers: headers_by_json({ data: req.user }),
-    });
-
-    if (!server) {
-      return res.status(401).json(
-        custom_response({
-          data: {
-            message: "Acceso no permitido",
+            message: "ID del servidor no existe",
           },
           code: StatusCodes.UNAUTHORIZED,
           status: API_STATUS.ACCESS_DENIED,
@@ -48,13 +31,38 @@ export const IsServerAdmin = async (
       );
     }
 
-    if (server.id_user !== id_user) {
+    const server = await prisma.servers.findUnique({
+      where: { id: id_server },
+    });
+
+    if (!server) {
       return res.status(401).json(
         custom_response({
           data: {
-            message: "Acceso no permitido",
+            message: "El servidor no existe",
           },
           code: StatusCodes.UNAUTHORIZED,
+          status: API_STATUS.ACCESS_DENIED,
+        })
+      );
+    }
+
+    if (server.id_user === id_user) {
+      req.server = { ...server };
+      return next();
+    }
+
+    const isMember = await prisma.serverMembers.findFirst({
+      where: { id_user: id_user, serverId: id_server },
+    });
+
+    if (!isMember) {
+      return res.status(403).json(
+        custom_response({
+          data: {
+            message: "Acceso denegado, no eres miembro del servidor",
+          },
+          code: StatusCodes.FORBIDDEN,
           status: API_STATUS.ACCESS_DENIED,
         })
       );
@@ -63,11 +71,10 @@ export const IsServerAdmin = async (
     req.server = { ...server };
     return next();
   } catch (error) {
-    console.log(error);
-    return res.status(500).json(
+    return res.status(400).json(
       bad_response({
         data: { error: error },
-        message: "Hubo un error de autentificacion",
+        message: "Hubo un error de autenticación",
       })
     );
   }

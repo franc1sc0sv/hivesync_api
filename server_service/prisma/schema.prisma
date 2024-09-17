@@ -20,7 +20,6 @@ model Servers {
   categories Categories[]    @relation("ServerCategories")
   events     Event[]         @relation("ServerEvents")
   members    ServerMembers[] @relation("ServerMemberships")
-  tags       Tags[]          @relation("ServerTags")
 }
 
 model Event {
@@ -29,30 +28,24 @@ model Event {
   description String
   date        DateTime
   serverId    String
-  server      Servers  @relation("ServerEvents", fields: [serverId], references: [id])
+  server      Servers  @relation("ServerEvents", fields: [serverId], references: [id], onDelete: Cascade)
 }
 
 model Categories {
   id       String  @id @default(uuid())
   name     String
   serverId String
-  Servers  Servers @relation("ServerCategories", fields: [serverId], references: [id])
-}
-
-model Tags {
-  id      String    @id @default(uuid())
-  name    String
-  servers Servers[] @relation("ServerTags")
+  Servers  Servers @relation("ServerCategories", fields: [serverId], references: [id], onDelete: Cascade)
 }
 
 model ServerMembers {
-  id        String   @id @default(uuid())
-  id_user   String
-  id_server String
-  role      String
-  joinedAt  DateTime @default(now())
-  serverId  String
-  server    Servers  @relation("ServerMemberships", fields: [serverId], references: [id])
+  id               String   @id @default(uuid())
+  id_user          String
+  role             String
+  joinedAt         DateTime @default(now())
+  serverId         String
+  isActiveInServer Boolean
+  server           Servers  @relation("ServerMemberships", fields: [serverId], references: [id], onDelete: Cascade)
 }
 
 enum PrivacityServer {

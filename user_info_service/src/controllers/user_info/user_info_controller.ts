@@ -156,6 +156,7 @@ export const GetUserDataByID = async (req: RequestWithUser, res: Response) => {
         name: true,
         createdAt: true,
         about: true,
+        username: true,
       },
     });
 
@@ -322,6 +323,54 @@ export const GetFriendData = async (req: RequestWithUser, res: Response) => {
     );
   } catch (error) {
     console.log(error);
+    const zod_error = detect_zod_error({ error });
+    if (zod_error?.error)
+      return res
+        .status(400)
+        .json(
+          error_response({ data: { error: error, message: zod_error.error } })
+        );
+
+    return res.status(500).json(
+      bad_response({
+        data: {
+          message: "error en el servidor",
+          error: error,
+        },
+      })
+    );
+  }
+};
+
+export const FindUserByNameController = async (
+  req: RequestWithUser,
+  res: Response
+) => {
+  try {
+    const rawData = req.body;
+    const parsedData = UserInput.parse(rawData);
+
+    const user = await prisma.userInfo.findFirst({
+      where: {
+        username: parsedData.username,
+      },
+    });
+
+    if (!user) {
+      return res.status(200).json(
+        good_response({
+          data: { message: "Usuario no encontrado" },
+        })
+      );
+    }
+
+    return res.status(200).json(
+      good_response({
+        data: { ...user },
+        message: "Usuario encontrado",
+      })
+    );
+  } catch (error) {
     const zod_error = detect_zod_error({ error });
     if (zod_error?.error)
       return res
