@@ -4,6 +4,8 @@ import { Categories, PrismaClient } from "@prisma/client";
 import {
   CreateServerSchema,
   EditInfoServerSchema,
+  EditServerNameSchema,
+  EditServerCoverSchema
 } from "../schemas/serverSchemas";
 import {
   bad_response,
@@ -165,6 +167,79 @@ export const EditInfoServer = async (req: RequestServer, res: Response) => {
       data: {
         name: validatedData.name,
         privacity: validatedData.privacity,
+      },
+    });
+
+    return res.status(200).json(
+      good_response({
+        data: updatedServer,
+        message: "Información del servidor actualizada con éxito",
+      })
+    );
+  } catch (error) {
+    const zod_error = detect_zod_error({ error });
+
+    if (error instanceof ZodError) {
+      return res
+        .status(400)
+        .json(
+          error_response({ data: { error: error, message: zod_error?.error } })
+        );
+    }
+    return res.status(500).json(
+      error_response({
+        data: { error: error },
+        message: "Error actualizando la información del servidor",
+      })
+    );
+  }
+};
+
+
+export const editServerName = async (req: RequestServer, res: Response) => {
+  try {
+    const validatedData = EditServerNameSchema.parse(req.body);
+
+    const updatedServer = await prisma.servers.update({
+      where: { id: req.server?.id },
+      data: {
+        name: validatedData.name,
+      },
+    });
+
+    return res.status(200).json(
+      good_response({
+        data: updatedServer,
+        message: "Información del servidor actualizada con éxito",
+      })
+    );
+  } catch (error) {
+    const zod_error = detect_zod_error({ error });
+
+    if (error instanceof ZodError) {
+      return res
+        .status(400)
+        .json(
+          error_response({ data: { error: error, message: zod_error?.error } })
+        );
+    }
+    return res.status(500).json(
+      error_response({
+        data: { error: error },
+        message: "Error actualizando la información del servidor",
+      })
+    );
+  }
+};
+
+export const editBackgroundColor = async (req: RequestServer, res: Response) => {
+  try {
+    const validatedData = EditServerCoverSchema.parse(req.body);
+
+    const updatedServer = await prisma.servers.update({
+      where: { id: req.server?.id },
+      data: {
+        backgroundUrl: validatedData.color,
       },
     });
 

@@ -9,13 +9,14 @@ datasource db {
 }
 
 model Servers {
-  id        String          @id @default(uuid())
-  name      String
-  avatarURL String
-  privacity PrivacityServer
-  id_user   String
-  createdAt DateTime        @default(now())
-  url       String
+  id            String          @id @default(uuid())
+  name          String
+  avatarURL     String
+  privacity     PrivacityServer
+  id_user       String
+  createdAt     DateTime        @default(now())
+  url           String
+  backgroundUrl String          @default("#382C6C")
 
   categories Categories[]    @relation("ServerCategories")
   events     Event[]         @relation("ServerEvents")
