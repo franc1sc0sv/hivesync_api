@@ -12,8 +12,27 @@ export const setupSocketIO = (io: SocketIOServer) => {
       console.log(`User ${socket.id} joined room ${room}`);
     });
 
-    socket.on("send_message", async (data: any) => {
-      io.to(data.id_room).emit("receive_message", data.message);
+    socket.on("send_message", async ({ data }, callback) => {
+      try {
+        const { roomId, userId, message }: InputDataMessage = data;
+
+        const user_data = await get_data_user(userId);
+
+        const newMessage = await postData({
+          AxiosConfig: AxiosChannelService,
+          data: {
+            message: message,
+            room: roomId,
+          },
+          url: "/messages",
+          headers: headers_by_json({ data: user_data }),
+        });
+
+        callback({ newMessage: newMessage });
+        socket.to(roomId).emit("receive_message", newMessage);
+      } catch (error) {
+        console.log(error);
+      }
     });
   });
 
@@ -145,6 +164,12 @@ type AcceptCall = {
 type InputData = {
   IsCameraActive: boolean;
   isMicrofoneActive: boolean;
+  userId: string;
+  roomId: string;
+};
+
+type InputDataMessage = {
+  message: string;
   userId: string;
   roomId: string;
 };
