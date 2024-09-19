@@ -73,7 +73,7 @@ export const setupSocketIO = (io: SocketIOServer) => {
         console.log(call);
 
         callback({ call: call });
-        socket.to(roomId).emit("new_peer", { call });
+        socket.to(roomId).emit("new_peer", { call, newUser: userId });
       } catch (error: any) {
         console.log(error);
       }
@@ -95,10 +95,15 @@ export const setupSocketIO = (io: SocketIOServer) => {
       } catch (error: any) {}
     });
 
-    socket.on("updateParams", async ({ data }, callback) => {
+    socket.on("updateParams", async ({ data }) => {
       try {
-        const { IsCameraActive, isMicrofoneActive, roomId, userId }: InputData =
-          data;
+        const {
+          IsCameraActive,
+          isMicrofoneActive,
+          roomId,
+          userId,
+          callId,
+        }: InputData = data;
         socket.join(roomId);
         const user_data = await get_data_user(userId);
 
@@ -108,12 +113,13 @@ export const setupSocketIO = (io: SocketIOServer) => {
             IsCameraActive: IsCameraActive,
           },
           AxiosConfig: AxiosChannelService,
-          id: roomId,
+          id: callId,
           url: "/calls/status",
-          headers: headers_by_json({ data: { ...user_data } }),
+          headers: headers_by_json({ data: user_data }),
         });
 
-        callback({ participant });
+        console.log(participant, data);
+
         socket.to(roomId).emit("newUsersParams", { participant, userId });
       } catch (error) {
         console.log(error);
@@ -166,6 +172,7 @@ type InputData = {
   isMicrofoneActive: boolean;
   userId: string;
   roomId: string;
+  callId: string;
 };
 
 type InputDataMessage = {

@@ -17,6 +17,8 @@ import {
 } from "../schemas/CallsSchema";
 import { ZodError } from "zod";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
+import { getData, headers_by_json } from "../utlis/http_request";
+import { AxiosUserInfoService } from "../config/axios";
 
 const prisma = new PrismaClient();
 
@@ -56,9 +58,22 @@ export const CreateCall = async (req: RequestWithUser, res: Response) => {
       include: { participants: true },
     });
 
+    const ParticipantsWithUserData = await Promise.all(
+      call.participants.map(async (participant) => {
+        const user_data = await getData({
+          AxiosConfig: AxiosUserInfoService,
+          url: `/user/${participant.userId}`,
+          headers: headers_by_json({ data: req.user }),
+        });
+        return { ...participant, user: user_data };
+      })
+    );
+
+    const newCall = { ...call, participants: [...ParticipantsWithUserData] };
+    console.log(newCall);
     return res.status(201).json(
       good_response({
-        data: call,
+        data: newCall,
         message: "Llamada creada con éxito",
       })
     );
@@ -102,9 +117,22 @@ export const GetCall = async (req: RequestWithUser, res: Response) => {
       );
     }
 
+    const ParticipantsWithUserData = await Promise.all(
+      call.participants.map(async (participant) => {
+        const user_data = await getData({
+          AxiosConfig: AxiosUserInfoService,
+          url: `/user/${participant.userId}`,
+          headers: headers_by_json({ data: req.user }),
+        });
+        return { ...participant, user: user_data };
+      })
+    );
+
+    const newCall = { ...call, participants: [...ParticipantsWithUserData] };
+
     return res.status(200).json(
       good_response({
-        data: call,
+        data: newCall,
       })
     );
   } catch (error) {
@@ -153,10 +181,22 @@ export const EndCall = async (req: RequestWithUser, res: Response) => {
       where: { id: user_id },
     });
 
-    const callStatus =
-      existingCall.participants.length >= 2
-        ? CallStatus.PENDING
-        : CallStatus.ENDED;
+    const newUpdatedCall = await prisma.call.findFirst({
+      where: {
+        roomId: callId,
+      },
+      include: { participants: true },
+    });
+
+    let callStatus;
+
+    if (newUpdatedCall?.participants.length === 0) {
+      callStatus = CallStatus.ENDED;
+    } else if (newUpdatedCall?.participants.length === 1) {
+      callStatus = CallStatus.PENDING;
+    } else {
+      callStatus = CallStatus.IN_PROGRESS;
+    }
 
     const updateCall = await prisma.call.update({
       data: {
@@ -166,9 +206,25 @@ export const EndCall = async (req: RequestWithUser, res: Response) => {
       include: { participants: true },
     });
 
+    const ParticipantsWithUserData = await Promise.all(
+      updateCall.participants.map(async (participant) => {
+        const user_data = await getData({
+          AxiosConfig: AxiosUserInfoService,
+          url: `/user/${participant.userId}`,
+          headers: headers_by_json({ data: req.user }),
+        });
+        return { ...participant, user: user_data };
+      })
+    );
+
+    const newCall = {
+      ...updateCall,
+      participants: [...ParticipantsWithUserData],
+    };
+
     return res.status(200).json(
       good_response({
-        data: updateCall,
+        data: newCall,
       })
     );
   } catch (error) {
@@ -196,7 +252,7 @@ export const AcceptCall = async (req: RequestWithUser, res: Response) => {
 
     const existingCall = await prisma.call.findFirst({
       where: {
-        AND: [{ roomId: callId }, { status: "PENDING" }],
+        AND: [{ roomId: callId }],
       },
     });
 
@@ -215,6 +271,18 @@ export const AcceptCall = async (req: RequestWithUser, res: Response) => {
       },
     });
 
+    const isUserOnCall = await prisma.callParticipant.findFirst({
+      where: { callId: updatedCall.id, userId: validatedData.participant },
+    });
+
+    if (isUserOnCall) {
+      return res.status(200).json(
+        good_response({
+          data: { message: "Ya estas en la llamada" },
+        })
+      );
+    }
+
     await prisma.callParticipant.create({
       data: {
         userId: validatedData.participant,
@@ -224,14 +292,44 @@ export const AcceptCall = async (req: RequestWithUser, res: Response) => {
       },
     });
 
+    const call = await prisma.call.findFirst({
+      where: { id: updatedCall.id },
+      include: { participants: true },
+    });
+
+    if (!call) {
+      return res.status(200).json(
+        good_response({
+          data: { message: "No existe una llamada en curso" },
+        })
+      );
+    }
+
+    const ParticipantsWithUserData = await Promise.all(
+      call.participants.map(async (participant) => {
+        const user_data = await getData({
+          AxiosConfig: AxiosUserInfoService,
+          url: `/user/${participant.userId}`,
+          headers: headers_by_json({ data: req.user }),
+        });
+        return { ...participant, user: user_data };
+      })
+    );
+
+    const newCall = {
+      ...call,
+      participants: [...ParticipantsWithUserData],
+    };
+
     return res.status(200).json(
       good_response({
-        data: updatedCall,
+        data: newCall,
         message: "Llamada actualizada con éxito",
       })
     );
   } catch (error) {
     const zod_error = detect_zod_error({ error });
+    console.log(error);
 
     if (error instanceof PrismaClientKnownRequestError) {
       console.log(error.message);
