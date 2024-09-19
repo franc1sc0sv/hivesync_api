@@ -9,35 +9,56 @@ export const UserSc = z.object({
   username: z.string(),
 });
 
+export const UserInputRegisterInfoSc = z.object({
+  name: z
+    .string({ required_error: "Nombre requerido" })
+    .min(2, { message: "El nombre debe tener al menos 2 caracteres." })
+    .max(50, { message: "El nombre no puede tener más de 50 caracteres." })
+    .regex(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/, { message: "El nombre solo puede contener letras, espacios y tildes" })
+});
+
 export const UserInputRegisterSc = z.object({
+
+  username: z
+    .string({ required_error: "username requerido" })
+    .min(5, { message: "El usuario debe tener al menos 5 caracteres" })
+    .regex(/^[a-zA-Z0-9_]+$/, { message: "El usuario solo puede contener letras, números y guiones bajos. Sin espacios." })
+    .trim(),
+
   email: z
     .string({ required_error: "email requerido" })
     .email({ message: "email invalido" }),
-  password: z
-    .string({ required_error: "password requerido" })
-    .min(8, { message: "password min length" }),
-  username: z
-    .string({ required_error: "username requerido" })
-    .min(5, { message: "username min length" }),
-});
+  // .trim(),
 
-export const UserInputRegisterInfoSc = z.object({
-  name: z
-    .string({ required_error: "nombre requerido" })
-    .min(2, { message: "name min length" }),
+  password: z
+    .string({ required_error: "Contraseña requerida" })
+    .min(8, { message: "La contraseña debe tener al menos 8 caracteres." })
+    .regex(/[A-Z]/, { message: "La contraseña debe contener al menos una letra mayúscula." })
+    .regex(/[a-z]/, { message: "La contraseña debe contener al menos una letra minúscula." })
+    .regex(/\d/, { message: "La contraseña debe contener al menos un número." })
+    .regex(/[@$!%*?&#]/, { message: "La contraseña debe contener al menos un carácter especial (@, $, !, %, *, ?, & o #)." })
+    .trim()
 });
 
 export const UserInputLoginSc = z.object({
-  user: z.string({ required_error: "usuario requerido" }),
-  password: z.string({ required_error: "password requerido" }),
+  user: z.string({ required_error: "usuario requerido" })
+    .trim(),
+  password: z.string({ required_error: "password requerido" })
+    .trim(),
 });
 
 // Esquema para el restablecimiento de contraseña
 export const ResetPasswordSc = z.object({
   token: z.string().min(1, { message: "Token de restablecimiento requerido" }),
-  newPassword: z.string()
-    .min(6, { message: "La contraseña debe tener al menos 6 caracteres" })
-    .min(1, { message: "La nueva contraseña es requerida" }),
+  newPassword: z
+    .string({ required_error: "Contraseña requerida" })
+    .min(8, { message: "La contraseña debe tener al menos 8 caracteres." })
+    .regex(/[A-Z]/, { message: "La contraseña debe contener al menos una letra mayúscula." })
+    .regex(/[a-z]/, { message: "La contraseña debe contener al menos una letra minúscula." })
+    .regex(/\d/, { message: "La contraseña debe contener al menos un número." })
+    .regex(/[@$!%*?&#]/, { message: "La contraseña debe contener al menos un carácter especial (@, $, !, %, *, ?, & o #)." })
+    .trim()
+  ,
 });
 
 // Esquema para la solicitud de restablecimiento de contraseña
