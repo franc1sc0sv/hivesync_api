@@ -21,3 +21,12 @@ export const ColorInputSc = z
   .regex(/^#?([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/, {
     message: "Debe ser un color hexadecimal válido",
   });
+
+  export const Username_about_meSc = z.object({
+    username: z
+      .string({ required_error: "username requerido" })
+      .min(2, { message: "username  min length" }),
+      about: z
+      .string({ required_error: "username requerido" })
+      .min(2, { message: "username  min length" }),
+  });
