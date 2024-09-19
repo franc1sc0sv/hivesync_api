@@ -19,7 +19,7 @@ import {
   bad_response,
   detect_zod_error,
   error_response,
-  good_response,
+  good_response
 } from "hivesync_utils";
 import { getData, postData } from "../../utlis/http_request";
 import { AxiosUserInfoService } from "../../config/axios";
@@ -185,6 +185,7 @@ export const register_controller = async (
     );
   }
 };
+
 
 export const get_profile_controller = (req: RequestWithUser, res: Response) => {
   return res.status(200).json(good_response({ data: req.user as User }));

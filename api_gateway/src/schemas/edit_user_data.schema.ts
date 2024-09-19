@@ -8,3 +8,8 @@ export const IdInputSc = z.object({
 export const UsernameInputSc = z.object({
     username: z.string({ required_error: "nombre requerido" })
 });
+
+export const Username_aboutInputSc = z.object({
+    username: z.string({ required_error: "nombre requerido" }),
+    about: z.string({ required_error: "descripción requerida requerida" })
+});

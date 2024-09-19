@@ -31,3 +31,8 @@ export const UserInputLoginSc = z.object({
   user: z.string({ required_error: "usuario requerido" }),
   password: z.string({ required_error: "password requerido" }),
 });
+
+// export const UserInputResetPasswordSc = z.object({
+//   token: z.string(),
+//   password: z.string({ required_error: "password requerido" }),
+// })
