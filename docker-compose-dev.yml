@@ -100,6 +100,9 @@ services:
       - JWT_SECRET=${JWT_SECRET}
       - PORT=${DEFAULT_INTERNAL_PORT_API}
       - DATABASE_URL=postgres://${DB_USER}:${DB_PASSWORD}@${GATEWAY_DB_HOST}:5432/${GATEWAY_DB_NAME}
+      - EMAIL_USER=${EMAIL_USER}
+      - EMAIL_PASS=${EMAIL_PASS}
+      - FRONTEND_URL=${FRONTEND_URL}
     volumes:
       - ./api_gateway:/usr/src/app
       - /usr/src/app/node_modules

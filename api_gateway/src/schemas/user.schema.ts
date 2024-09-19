@@ -32,7 +32,23 @@ export const UserInputLoginSc = z.object({
   password: z.string({ required_error: "password requerido" }),
 });
 
-// export const UserInputResetPasswordSc = z.object({
-//   token: z.string(),
-//   password: z.string({ required_error: "password requerido" }),
-// })
+// Esquema para el restablecimiento de contraseña
+export const ResetPasswordSc = z.object({
+  token: z.string().min(1, { message: "Token de restablecimiento requerido" }),
+  newPassword: z.string()
+    .min(6, { message: "La contraseña debe tener al menos 6 caracteres" })
+    .min(1, { message: "La nueva contraseña es requerida" }),
+});
+
+// Esquema para la solicitud de restablecimiento de contraseña
+export const RequestPasswordResetSc = z.object({
+  email: z.string()
+    .email({ message: "El correo electrónico debe ser válido" })
+    .min(1, { message: "El correo electrónico es requerido" }),
+});
+
+// Inferir el tipo a partir del esquema
+export type RequestPasswordResetInput = z.infer<typeof RequestPasswordResetSc>;
+export type ResetPasswordInput = z.infer<typeof ResetPasswordSc>;
+
+
