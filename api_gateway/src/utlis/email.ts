@@ -30,7 +30,7 @@ export const sendResetPasswordEmail = async (to: string, token: string): Promise
                 <style>
                     body {
                         font-family: Arial, sans-serif;
-                        color: #333;
+                        color: #0056b3;
                         background-color: #f4f4f4;
                         margin: 0;
                         padding: 0;
@@ -45,15 +45,16 @@ export const sendResetPasswordEmail = async (to: string, token: string): Promise
                         box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
                     }
                     h1 {
-                        color: #0056b3;
+                        color: #0a0a0a;
                         font-size: 24px;
                     }
                     p {
                         line-height: 1.6;
                         margin: 0 0 10px;
+                        color: #000000; /* Cambiado a negro */
                     }
                     a {
-                        color: #007bff;
+                        color: #0056b3;
                         text-decoration: none;
                         font-weight: bold;
                     }
@@ -66,7 +67,7 @@ export const sendResetPasswordEmail = async (to: string, token: string): Promise
                         margin-top: 20px;
                     }
                 </style>
-          A  </head>
+            </head>
             <body>
                 <div class="container">
                     <h1>Solicitud de Restablecimiento de Contraseña</h1>
