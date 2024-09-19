@@ -16,7 +16,6 @@ export const auth_middleware = () => {
   return async (req: RequestWithUser, res: Response, next: NextFunction) => {
     try {
       const auth = req.headers.authorization;
-      console.log(auth)
 
       if (auth && auth.startsWith("Bearer")) {
         const JWT_SECRET = process.env.JWT_SECRET;
