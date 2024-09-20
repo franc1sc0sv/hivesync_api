@@ -27,9 +27,8 @@ export const setupSocketIO = (io: SocketIOServer) => {
           url: "/messages",
           headers: headers_by_json({ data: user_data }),
         });
-
-        callback({ newMessage: newMessage });
         socket.to(roomId).emit("receive_message", newMessage);
+        callback({ newMessage: newMessage });
       } catch (error) {
         console.log(error);
       }
