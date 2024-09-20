@@ -7,7 +7,7 @@ export type UserInfo = {
   username: String;
 };
 
-type User = {
+export type User = {
   id: string;
   email: string;
   username: string;

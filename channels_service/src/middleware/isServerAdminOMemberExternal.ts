@@ -82,6 +82,7 @@ export const IsServerAdminOrMemberExternal = async (
     req.server = { ...server_to_send };
     return next();
   } catch (error) {
+    console.log(error);
     return res.status(400).json(
       bad_response({
         data: { error: error },

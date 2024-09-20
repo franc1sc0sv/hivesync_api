@@ -234,6 +234,7 @@ export const GetManyChannelsFromServer = async (
       })
     );
   } catch (error) {
+    console.log(error);
     return res.status(500).json(
       error_response({
         data: { error: error },

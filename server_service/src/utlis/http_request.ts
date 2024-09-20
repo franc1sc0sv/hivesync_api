@@ -1,4 +1,10 @@
 import { AxiosInstance } from "axios";
+import { User } from "../types/user";
+
+const stringify = (user: User | undefined): string => {
+  if (!user?.id) return "";
+  return Buffer.from(JSON.stringify(user)).toString("base64");
+};
 
 export const postData = async ({
   url,
@@ -90,7 +96,7 @@ export const deleteData = async ({
 
 export const headers_by_json = ({ data }: { data: any }) => {
   return () => {
-    return { headers: { user: JSON.stringify(data) } };
+    return { headers: { user: stringify(data) } };
   };
 };
 

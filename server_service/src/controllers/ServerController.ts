@@ -5,7 +5,7 @@ import {
   CreateServerSchema,
   EditInfoServerSchema,
   EditServerNameSchema,
-  EditServerCoverSchema
+  EditServerCoverSchema,
 } from "../schemas/serverSchemas";
 import {
   bad_response,
@@ -195,7 +195,6 @@ export const EditInfoServer = async (req: RequestServer, res: Response) => {
   }
 };
 
-
 export const editServerName = async (req: RequestServer, res: Response) => {
   try {
     const validatedData = EditServerNameSchema.parse(req.body);
@@ -232,7 +231,10 @@ export const editServerName = async (req: RequestServer, res: Response) => {
   }
 };
 
-export const editBackgroundColor = async (req: RequestServer, res: Response) => {
+export const editBackgroundColor = async (
+  req: RequestServer,
+  res: Response
+) => {
   try {
     const validatedData = EditServerCoverSchema.parse(req.body);
 
@@ -337,6 +339,7 @@ export const GetDataFromSpecificServer = async (
       })
     );
   } catch (error: any) {
+    console.log(error);
     const zod_error = detect_zod_error({ error });
     if (error instanceof ZodError) {
       return res
