@@ -30,3 +30,5 @@ app.use(BASE_URL + "/management", NotificationsRouter);
 app.listen(PORT, () => {
   console.log(`NOTIFICATIONS microservice initialized in ${PORT}`);
 });
+
+("");
