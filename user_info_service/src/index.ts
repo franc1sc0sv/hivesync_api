@@ -28,3 +28,5 @@ app.use(BASE_URL + "/user", user_info_router);
 app.listen(PORT, () => {
   console.log(`USER-INFO_SERVICE initialized in ${PORT}`);
 });
+
+("");

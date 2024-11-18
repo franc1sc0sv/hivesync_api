@@ -33,3 +33,5 @@ app.use(BASE_URL + "/calls", CallsRouter);
 app.listen(PORT, () => {
   console.log(`CHANNELS microservice initialized in ${PORT}`);
 });
+
+("");

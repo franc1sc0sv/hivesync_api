@@ -34,3 +34,5 @@ app.use(BASE_URL + "/members", MembersRouter);
 app.listen(PORT, () => {
   console.log(`SERVER microservice initialized in ${PORT}`);
 });
+
+("");

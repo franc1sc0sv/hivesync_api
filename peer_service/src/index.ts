@@ -16,3 +16,5 @@ peerServer.on("disconnect", (client) => {
 });
 
 console.log(`PeerJS server running on port ${PORT}`);
+
+("");

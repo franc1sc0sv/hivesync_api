@@ -76,3 +76,5 @@ app.use(BASE_URL + "/notifications", [
 server.listen(PORT, () => {
   console.log(`API GATEWAY initialized in ${PORT}`);
 });
+
+("");

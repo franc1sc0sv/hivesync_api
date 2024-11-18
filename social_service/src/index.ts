@@ -30,3 +30,5 @@ app.use(BASE_URL + "/request", FriendRequestRouter);
 app.listen(PORT, () => {
   console.log(`SOCIAL microservice initialized in ${PORT}`);
 });
+
+("");
